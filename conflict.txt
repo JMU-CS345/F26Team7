@@ -1,1 +1,1 @@
-This a conflicting file.
+change in file
