@@ -16,35 +16,36 @@ _
 
 | Name | GitHub username | Preferred contact | Usual availability |
 |------|-----------------|-------------------|--------------------|
-|      |                 |                   |                    |
-|      |                 |                   |                    |
-|      |                 |                   |                    |
-|      |                 |                   |                    |
+|Nate         | natehouseknecht                 |                   |                    |
+|Z            | wrigh4zx                        |                   |                    |
+|Mamadou      | mamadoucth/lab                  |                   |                    |
+|Victor       | Victor915187                    |                   |                    |
 
 ### Scrum Master
 
-**Sprint 1 Scrum Master:** _
+**Sprint 1 Scrum Master:** Victor Zangla
 
 **Does the role rotate?** *(e.g., rotates each sprint in the order listed above; or one person for the whole project)*
-
+Rotates 
 _
 
 ### Product Owner
 
 *Choose one team member who will interact with the instructor (stakeholder) to clarify and prioritize stories, and to collect new ones.*
+Nate Houseknecht
 
 _
 
 ### Other Responsibilities
 
-Who is responsible for maintaining the project board / backlog in good order? *(Scrum Master?)*
+Who is responsible for maintaining the project board / backlog in good order? *(Scrum Master?)* Victor Zangla
 
-Who is responsible for deploying the main branch to production to update GitHub pages?
+Who is responsible for deploying the main branch to production to update GitHub pages? Nate Houseknecht
 
 ### Decision Making
 
 *(How do we decide things: consensus, majority vote, Scrum Master decides? What happens if we are deadlocked?)*
-
+Democracy, if we can't agree, Victor Zangla
 _
 
 ---
@@ -114,12 +115,12 @@ _
 
 ### Primary Channel
 
-**Channel:** *(Discord, Slack, GroupMe, ...)*
+**Channel:** *(Discord, Slack, GroupMe, ...)* Text
 
 **Expected response time:** *(e.g., within 12 hours on weekdays)*
 
 ### What Goes Where
-
+Scheduling, abstract ideas, or other things in text, more specifics in GitHub issues, specific coding comments in PR comments
 *(What is discussed in the chat channel vs. in GitHub issues vs. in PR comments?)*
 
 _
@@ -127,12 +128,13 @@ _
 ### Reporting Blockers or Falling Behind
 
 *(How and how early does a member tell the team they are stuck or behind?)*
-
+Tell them they're being stupid.
 _
 
 ### Absences
 
 *(How much notice is required? How is the absent member's work covered?)*
+
 
 _
 
@@ -161,6 +163,7 @@ _
 ### Commit Messages
 
 *(Format and style, e.g., imperative mood: "Add rune puzzle validation". Do we follow Conventional Commits?)*
+Short description of what was done, informal is fine
 
 _
 
