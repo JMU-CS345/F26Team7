@@ -359,6 +359,6 @@ _
 | GitHub name | Signature (type your name) | Date |
 |------|----------------------------|------|
 |      |                            |      |
-|      |    Victor Zangla           |      |
+|      |                            |      |
 |      |                            |      |
 |      |                            |      |
