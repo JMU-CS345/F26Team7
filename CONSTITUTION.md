@@ -155,9 +155,9 @@ _
 
 ### Branch Protection on `main`
 
-- [ ] No direct pushes to `main`
-- [ ] Required approvals before merge: _
-- [ ] CI must pass before merge
+- [X] No direct pushes to `main`
+- [X] Required approvals before merge: Code review by another member
+- [X] CI must pass before merge
 - [ ] Same protection on `production`
 
 ### Commit Messages
