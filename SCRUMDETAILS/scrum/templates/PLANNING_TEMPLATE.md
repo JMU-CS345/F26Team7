@@ -71,23 +71,23 @@ for knowing if this is realistic.
 
 *Break each story into tasks. Include tasks for writing tests and reviewing PRs, not only coding.*
 
-### Issue #1: *(story title)*
+### Issue #1: *Dungeon Generation*
 
-- [ ]
-- [ ]
-- [ ]
+- [Dungeons should have one staircase down]
+- [Dungeon rooms should have ways in and out]
+- [Dungeon rooms should have solid walls and obstacles]
 
-### Issue #19: *(story title)*
+### Issue #19: *(Starting Screen)*
 
-- [ ]
-- [ ]
-- [ ]
+- [Start screen should have a start and an options button]
+- [Clicking the start button should start the game]
+- [Clicking the options button should open another sub menu to be completed later]
 
-### Issue #23: *(story title)*
+### Issue #23: *(Grid Movement)*
 
-- [ ]
-- [ ]
-- [ ]
+- [Draw a Mage]
+- [Draw another Mage frame for animation's sake]
+- [Allow the Mage to move up, down, left, and right, within the confines of the screen]
 
 ---
 
