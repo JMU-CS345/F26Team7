@@ -73,21 +73,22 @@ for knowing if this is realistic.
 
 ### Issue #1: *Dungeon Generation*
 
-- [Dungeons should have one staircase down]
-- [Dungeon rooms should have ways in and out]
-- [Dungeon rooms should have solid walls and obstacles]
+- [Dungeons should have one staircase down] (0.5hrs)
+- [Draw dungeon floors and obstacles] (1 hr)
+- [Dungeon rooms should have ways in and out] (2 hrs)
+- [Dungeon rooms should have solid walls and obstacles] (1 hr)
 
 ### Issue #19: *(Starting Screen)*
 
-- [Start screen should have a start and an options button]
-- [Clicking the start button should start the game]
-- [Clicking the options button should open another sub menu to be completed later]
+- [Draw start screen with a start and an options button] (0.5 hrs)
+- [Clicking the start button should start the game] (0.5 hrs)
+- [Clicking the options button should open another sub menu to be completed later] (0.5 hrs)
 
 ### Issue #23: *(Grid Movement)*
 
-- [Draw a Mage]
-- [Draw another Mage frame for animation's sake]
-- [Allow the Mage to move up, down, left, and right, within the confines of the screen]
+- [Draw a Mage] (0.5 hrs)
+- [Draw another Mage frame for animation's sake] (0.25 hrs)
+- [Allow the Mage to move up, down, left, and right, within the confines of the screen] (1 hr)
 
 ---
 
