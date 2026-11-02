@@ -73,22 +73,21 @@ for knowing if this is realistic.
 
 ### Issue #1: *Dungeon Generation*
 
-- [Dungeons should have one staircase down] (0.5hrs)
-- [Draw dungeon floors and obstacles] (1 hr)
-- [Dungeon rooms should have ways in and out] (2 hrs)
-- [Dungeon rooms should have solid walls and obstacles] (1 hr)
+- [Dungeons should have one staircase down]
+- [Dungeon rooms should have ways in and out]
+- [Dungeon rooms should have solid walls and obstacles]
 
 ### Issue #19: *(Starting Screen)*
 
-- [Draw start screen with a start and an options button] (0.5 hrs)
-- [Clicking the start button should start the game] (0.5 hrs)
-- [Clicking the options button should open another sub menu to be completed later] (0.5 hrs)
+- [Start screen should have a start and an options button]
+- [Clicking the start button should start the game]
+- [Clicking the options button should open another sub menu to be completed later]
 
 ### Issue #23: *(Grid Movement)*
 
-- [Draw a Mage] (0.5 hrs)
-- [Draw another Mage frame for animation's sake] (0.25 hrs)
-- [Allow the Mage to move up, down, left, and right, within the confines of the screen] (1 hr)
+- [Draw a Mage]
+- [Draw another Mage frame for animation's sake]
+- [Allow the Mage to move up, down, left, and right, within the confines of the screen]
 
 ---
 
@@ -96,10 +95,10 @@ for knowing if this is realistic.
 
 | Member | Stories owned | Points |
 |--------|---------------|--------|
-|        |               |        |
-|        |               |        |
-|        |               |        |
-|        |               |        |
+| Mamadou Cissoko|dungeon generation          |        |
+| Z wright      |dungeon generation         |        |
+| Victor       | function of movment           |        |
+| Nate      | Art for rooms and screen     |        |
 
 *If the work is not balanced, explain why:*
 
