@@ -44,6 +44,7 @@ const CONFIG = {
   },
 };
 
+
 // ---------------------------------------------------------------
 // Game state
 // ---------------------------------------------------------------
@@ -54,6 +55,10 @@ let imgs = {};          // loaded images (null if missing)
 let gameFont = null;
 let introVideo;
 let videoFailed = false;
+const cols = 32;
+const rows = 18;
+const tileSize = 30;
+let dungeon = [];
 
 function loadOptionalImage(key, path) {
   imgs[key] = null;
@@ -229,16 +234,30 @@ function keyPressed() {
 }
 
 function generateDungeon() {
-  let cols = 30;
-  let rows = 10;
-  let dungeon = [];
-  for (let y = 0; y < rows; y++) {
-    let row = [];
+    dungeon = [];
 
-    for (let x = 0; x < cols; x++) {
-      row.push(1);
+    // Fill the entire map with walls
+    for (let y = 0; y < rows; y++) {
+        let row = [];
+
+        for (let x = 0; x < cols; x++) {
+            row.push(1);
+        }
+
+        dungeon.push(row);
     }
 
-    dungeon.push(row);
-  }
+    // Generate one random room
+    let roomWidth = floor(random(4, 9));
+    let roomHeight = floor(random(4, 8));
+
+    let roomX = floor(random(1, cols - roomWidth - 1));
+    let roomY = floor(random(1, rows - roomHeight - 1));
+
+    // Carve out the room
+    for (let y = roomY; y < roomY + roomHeight; y++) {
+        for (let x = roomX; x < roomX + roomWidth; x++) {
+            dungeon[y][x] = 0;
+        }
+    }
 }
