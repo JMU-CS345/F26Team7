@@ -23,6 +23,8 @@ const CONFIG = {
     playButtonHover:"assets/play_button_hover.png", // optional
     introVideo:     "assets/intro.mp4",
     level1Background: "assets/level1_background.png", // optional
+    playerFrame1:   "assets/player_1.png", // optional; walking frame 1
+    playerFrame2:   "assets/player_2.png", // optional walking frame 2
     font:           null, // e.g. "assets/MyFont.ttf"
   },
 
@@ -32,6 +34,15 @@ const CONFIG = {
     creditsY: 250,
     button: { x: 480, y: 360, w: 220, h: 70 },
   },
+  
+  player: {
+    size: 48,          // width and height in pixels (placeholder box / sprite size)
+    speed: 220,        // pixels per second
+    frameTime: 0.25,   // seconds each animation frame is shown while walking
+    startX: 456,       // top-left start position
+    startY: 246,
+  },
+
 
   colors: {
     background: [20, 16, 40],
@@ -41,6 +52,9 @@ const CONFIG = {
     buttonHover: [150, 110, 240],
     buttonText: [255, 255, 255],
     level: [0, 0, 0],
+    playerFrame1: [120, 190, 255], // box color on animation frame 1
+    playerFrame2: [255, 200, 90],  // box color on animation frame 2
+    playerNose:   [30, 30, 60],
   },
 };
 
@@ -50,6 +64,7 @@ const CONFIG = {
 const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1" };
 let state = STATE.MENU;
 let level1Initialized = false;
+let player;
 let imgs = {};          // loaded images (null if missing)
 let gameFont = null;
 let introVideo;
@@ -62,7 +77,7 @@ function loadOptionalImage(key, path) {
 }
 
 function preload() {
-  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "level1Background"]) {
+  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "level1Background", "playerFrame1", "playerFrame2"]) {
     loadOptionalImage(key, CONFIG.assets[key]);
   }
   if (CONFIG.assets.font) {
