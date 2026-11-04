@@ -23,6 +23,8 @@ const CONFIG = {
     playButtonHover:"assets/play_button_hover.png", // optional
     introVideo:     "assets/intro.mp4",
     level1Background: "assets/level1_background.png", // optional
+    playerFrame1:   "assets/player_1.png", // optional; walking frame 1
+    playerFrame2:   "assets/player_2.png", // optional walking frame 2
     font:           null, // e.g. "assets/MyFont.ttf"
   },
 
@@ -32,6 +34,15 @@ const CONFIG = {
     creditsY: 250,
     button: { x: 480, y: 360, w: 220, h: 70 },
   },
+  
+  player: {
+    size: 48,          // width and height in pixels (placeholder box / sprite size)
+    speed: 220,        // pixels per second
+    frameTime: 0.25,   // seconds each animation frame is shown while walking
+    startX: 456,       // top-left start position
+    startY: 246,
+  },
+
 
   colors: {
     background: [20, 16, 40],
@@ -41,6 +52,9 @@ const CONFIG = {
     buttonHover: [150, 110, 240],
     buttonText: [255, 255, 255],
     level: [0, 0, 0],
+    playerFrame1: [120, 190, 255], // box color on animation frame 1
+    playerFrame2: [255, 200, 90],  // box color on animation frame 2
+    playerNose:   [30, 30, 60],
   },
 };
 
@@ -51,6 +65,7 @@ const CONFIG = {
 const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1" };
 let state = STATE.MENU;
 let level1Initialized = false;
+let player;
 let imgs = {};          // loaded images (null if missing)
 let gameFont = null;
 let introVideo;
@@ -67,7 +82,7 @@ function loadOptionalImage(key, path) {
 }
 
 function preload() {
-  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "level1Background"]) {
+  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "level1Background", "playerFrame1", "playerFrame2"]) {
     loadOptionalImage(key, CONFIG.assets[key]);
   }
   if (CONFIG.assets.font) {
@@ -86,151 +101,7 @@ function setup() {
 }
 
 function draw() {
-  try {
-    if (state === STATE.MENU) drawMenu();
-    else if (state === STATE.VIDEO) drawVideo();
-    else if (state === STATE.LEVEL1) drawLevel1();
-  } catch (e) {
-    console.error("draw() failed while in state:", state, e);
-    noLoop();
-  }
-}
-
-// ---------------------------------------------------------------
-// Menu
-// ---------------------------------------------------------------
-function drawMenu() {
-  if (imgs.menuBackground) image(imgs.menuBackground, 0, 0, width, height);
-  else background(...CONFIG.colors.background);
-
-  const L = CONFIG.layout;
-  textAlign(CENTER, CENTER);
-  if (gameFont) textFont(gameFont);
-
-  // Title
-  if (imgs.titleLogo) {
-    imageMode(CENTER);
-    image(imgs.titleLogo, width / 2, L.titleY);
-    imageMode(CORNER);
-  } else {
-    fill(...CONFIG.colors.title);
-    noStroke();
-    textSize(84);
-    text(CONFIG.title, width / 2, L.titleY);
-  }
-
-  // Credits subscript
-  fill(...CONFIG.colors.credits);
-  noStroke();
-  textSize(20);
-  text(CONFIG.credits, width / 2, L.creditsY);
-
-  drawPlayButton();
-}
-
-function playButtonHovered() {
-  const b = CONFIG.layout.button;
-  return mouseX > b.x - b.w / 2 && mouseX < b.x + b.w / 2 &&
-         mouseY > b.y - b.h / 2 && mouseY < b.y + b.h / 2;
-}
-
-function drawPlayButton() {
-  const b = CONFIG.layout.button;
-  const hovered = playButtonHovered();
-  cursor(hovered ? HAND : ARROW);
-
-  const art = hovered && imgs.playButtonHover ? imgs.playButtonHover : imgs.playButton;
-  if (art) {
-    imageMode(CENTER);
-    image(art, b.x, b.y, b.w, b.h);
-    imageMode(CORNER);
-  } else {
-    rectMode(CENTER);
-    noStroke();
-    fill(...(hovered ? CONFIG.colors.buttonHover : CONFIG.colors.button));
-    rect(b.x, b.y, b.w, b.h, 12);
-    rectMode(CORNER);
-    fill(...CONFIG.colors.buttonText);
-    textSize(32);
-    text("Play", b.x, b.y);
-  }
-}
-
-// ---------------------------------------------------------------
-// Intro video
-// ---------------------------------------------------------------
-function startVideo() {
-  if (videoFailed) { startLevel1(); return; } // no video file yet? skip ahead
-  state = STATE.VIDEO;
-  cursor(ARROW);
-  introVideo.volume(1);
-  introVideo.play();
-}
-
-function drawVideo() {
-  background(0);
-  image(introVideo, 0, 0, width, height);
-
-  fill(255, 140);
-  noStroke();
-  textAlign(RIGHT, BOTTOM);
-  textSize(14);
-  text("Click or press any key to skip", width - 12, height - 10);
-}
-
-// ---------------------------------------------------------------
-// Level 1 (blank for now)
-// ---------------------------------------------------------------
-function startLevel1() {
-  if (state === STATE.LEVEL1) return;
-  state = STATE.LEVEL1;          // switch state first so we never get stuck
-  console.log("Starting level 1");
-  try {
-    introVideo.elt.pause();
-  } catch (e) {
-    console.error("Could not pause video:", e);
-  }
-}
-
-function drawLevel1() {
-  // One-time setup the first time level 1 is drawn
-  if (!level1Initialized) {
-    level1Initialized = true;
-    console.log("Level 1 first frame: forcing repaint");
-
-    clear();
-
-    const c = drawingContext.canvas;
-    const prevDisplay = c.style.display;
-    c.style.display = "none";
-    void c.offsetHeight;
-    c.style.display = prevDisplay;
-  }
-
-  if (imgs.level1Background) image(imgs.level1Background, 0, 0, width, height);
-  else background(...CONFIG.colors.level);
-
-  // Placeholder text
-  fill(255);
-  noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(40);
-  if (gameFont) textFont(gameFont);
-  text("Level 1 Under Construction", width / 2, height / 2);
-
-  // Level 1 gameplay goes here.
-}
-
-// ---------------------------------------------------------------
-// Input
-// ---------------------------------------------------------------
-function mousePressed() {
-  if (state === STATE.MENU && playButtonHovered()) startVideo();
-  else if (state === STATE.VIDEO) startLevel1();
-}
-
-function keyPressed() {
-  if (state === STATE.VIDEO) startLevel1();
+  background(220);
 }
 
 function generateDungeon() {
