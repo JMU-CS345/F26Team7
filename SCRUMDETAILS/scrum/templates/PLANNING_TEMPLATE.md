@@ -6,11 +6,11 @@
 
 ## 1. Meeting Details
 
-**Date:**  11/02/2026
+**Date:** _
 
-**Scrum Master:**  Victor Zangla
+**Scrum Master:** _
 
-**Attendees:**  Victor, Nate, Mamadou, Z
+**Attendees:** _
 
 **Absent:** _
 
@@ -20,49 +20,42 @@
 
 *One or two sentences describing a playable outcome, not a list of tickets. e.g., "A player can create a character and enter the first dungeon."*
 
-Player can move around a randomly created map after pressing "play" on a starting screen.
+_
 
 ---
 
 ## 3. Capacity and Velocity
 
-**Sprint dates:** 11/02/2026 to 11/09/2026
+**Sprint dates:** _ to _
 
-**Velocity last sprint (points completed):** N/A *(Sprint 1: write "n/a")*
+**Velocity last sprint (points completed):** _ *(Sprint 1: write "n/a")*
 
-**Average velocity so far:** N/A
+**Average velocity so far:** _
 
-**Known absences or reduced availability this sprint:** NONE
+**Known absences or reduced availability this sprint:** _
 
-**Points committed this sprint:** 
--Grid Movement
--Starting Screen
--Dungeon Generation
+**Points committed this sprint:** _
 
 **Why this commitment is realistic:** *(Compare it to your velocity and capacity. If you are committing more than last sprint's velocity, explain why.)*
 
-This is our first sprint, we do not have a frame of reference
-for knowing if this is realistic.
+_
 
 ---
 
 ## 4. Committed Backlog Items
--Grid Movement
--Starting Screen
--Dungeon Generation
 
 *Every item listed here must meet the Definition of Ready in your constitution. Items should be taken from the top of the product backlog in priority order. If you skipped a higher-priority item, explain why under "Notes".*
 
 | Issue # | User story | Estimate | Owner | Ready? |
 |---------|------------|----------|-------|--------|
-|  #1     | As a player, I want to move my mage character in four directions across the dungeon grid, so that I can navigate rooms and avoid obstacles. |1 day|Nate| [ ]    |
-|  #19    | As a player, I want to open the game to a starting screen, so that I am greeted each time I open the game.| 1 day |Nate| [ ]    |
-|  #23    | As a player, I want to see variety within the different rooms I explore.          |1 week|Victor| [ ]    |
+|         |            |          |       | [ ]    |
+|         |            |          |       | [ ]    |
+|         |            |          |       | [ ]    |
 |         |            |          |       | [ ]    |
 |         |            |          |       | [ ]    |
 
 **Total points:** _
-3
+
 **Notes:** _
 
 ---
@@ -71,24 +64,19 @@ for knowing if this is realistic.
 
 *Break each story into tasks. Include tasks for writing tests and reviewing PRs, not only coding.*
 
-### Issue #1: *Dungeon Generation*
+### Issue #_: *(story title)*
 
-- [Dungeons should have one staircase down] (0.5hrs)
-- [Draw dungeon floors and obstacles] (1 hr)
-- [Dungeon rooms should have ways in and out] (2 hrs)
-- [Dungeon rooms should have solid walls and obstacles] (1 hr)
+- [ ]
+- [ ]
+- [ ]
 
-### Issue #19: *(Starting Screen)*
+### Issue #_: *(story title)*
 
-- [Draw start screen with a start and an options button] (0.5 hrs)
-- [Clicking the start button should start the game] (0.5 hrs)
-- [Clicking the options button should open another sub menu to be completed later] (0.5 hrs)
+- [ ]
+- [ ]
+- [ ]
 
-### Issue #23: *(Grid Movement)*
-
-- [Draw a Mage] (0.5 hrs)
-- [Draw another Mage frame for animation's sake] (0.25 hrs)
-- [Allow the Mage to move up, down, left, and right, within the confines of the screen] (1 hr)
+*(Repeat for each committed story.)*
 
 ---
 
@@ -103,8 +91,7 @@ for knowing if this is realistic.
 
 *If the work is not balanced, explain why:*
 
-_The dungeon generation is much more complex
-than starting menu and movement.
+_
 
 ---
 
