@@ -23,6 +23,8 @@ const CONFIG = {
     playButtonHover:"assets/play_button_hover.png", // optional
     introVideo:     "assets/intro.mp4",
     level1Background: "assets/level1_background.png", // optional
+    playerFrame1:   "assets/player_1.png", // optional; walking frame 1
+    playerFrame2:   "assets/player_2.png", // optional walking frame 2
     font:           null, // e.g. "assets/MyFont.ttf"
   },
 
@@ -32,6 +34,15 @@ const CONFIG = {
     creditsY: 250,
     button: { x: 480, y: 360, w: 220, h: 70 },
   },
+  
+  player: {
+    size: 48,          // width and height in pixels (placeholder box / sprite size)
+    speed: 220,        // pixels per second
+    frameTime: 0.25,   // seconds each animation frame is shown while walking
+    startX: 456,       // top-left start position
+    startY: 246,
+  },
+
 
   colors: {
     background: [20, 16, 40],
@@ -41,6 +52,9 @@ const CONFIG = {
     buttonHover: [150, 110, 240],
     buttonText: [255, 255, 255],
     level: [0, 0, 0],
+    playerFrame1: [120, 190, 255], // box color on animation frame 1
+    playerFrame2: [255, 200, 90],  // box color on animation frame 2
+    playerNose:   [30, 30, 60],
   },
 };
 
@@ -50,6 +64,7 @@ const CONFIG = {
 const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1" };
 let state = STATE.MENU;
 let level1Initialized = false;
+let player;
 let imgs = {};          // loaded images (null if missing)
 let gameFont = null;
 let introVideo;
@@ -62,7 +77,7 @@ function loadOptionalImage(key, path) {
 }
 
 function preload() {
-  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "level1Background"]) {
+  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "level1Background", "playerFrame1", "playerFrame2"]) {
     loadOptionalImage(key, CONFIG.assets[key]);
   }
   if (CONFIG.assets.font) {
@@ -177,7 +192,8 @@ function drawVideo() {
 // ---------------------------------------------------------------
 function startLevel1() {
   if (state === STATE.LEVEL1) return;
-  state = STATE.LEVEL1;          // switch state first so we never get stuck
+  state = STATE.LEVEL1; // switch state first so we never get stuck
+  createPlayer();
   console.log("Starting level 1");
   try {
     introVideo.elt.pause();
@@ -201,19 +217,121 @@ function drawLevel1() {
     c.style.display = prevDisplay;
   }
 
+  const dt = Math.min(deltaTime / 1000, 0.05);
+ 
+  updatePlayer(dt);
+ 
+  // --- WORLD: dungeon drawing code goes here ---
   if (imgs.level1Background) image(imgs.level1Background, 0, 0, width, height);
   else background(...CONFIG.colors.level);
-
-  // Placeholder text
-  fill(255);
+ 
+  // --- PLAYER: always drawn after the world so it sits on top ---
+  drawPlayer();
+ 
+  // Small status label (delete when real level 1 work begins)
+  fill(255, 160);
   noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(40);
-  if (gameFont) textFont(gameFont);
-  text("Level 1 Under Construction", width / 2, height / 2);
+  textAlign(LEFT, TOP);
+  textSize(16);
+  text("Level 1 Under Construction - arrow keys to move", 12, 10);
 
   // Level 1 gameplay goes here.
 }
+
+function createPlayer() {
+  const P = CONFIG.player;
+  player = {
+    x: P.startX,
+    y: P.startY,
+    w: P.size,
+    h: P.size,
+    moving: false,
+    facing: 1,      // 1 = facing right, -1 = facing left (drives the sprite flip)
+    animFrame: 0,   // 0 or 1: which of the two animation frames is showing
+    animTimer: 0,
+  };
+}
+
+function isBlocked(x, y, w, h) {
+  return false;
+}
+
+function updatePlayer(dt) {
+  const P = CONFIG.player;
+ 
+  let dx = 0;
+  let dy = 0;
+  if (keyIsDown(LEFT_ARROW)) dx -= 1;
+  if (keyIsDown(RIGHT_ARROW)) dx += 1;
+  if (keyIsDown(UP_ARROW)) dy -= 1;
+  if (keyIsDown(DOWN_ARROW)) dy += 1;
+ 
+  player.moving = dx !== 0 || dy !== 0;
+ 
+  // Face the way we're walking. Moving only up or down keeps the last
+  // left/right facing, and holding left+right together changes nothing.
+  if (dx < 0) player.facing = -1;
+  else if (dx > 0) player.facing = 1;
+ 
+  if (player.moving) {
+    // Normalize so diagonal movement isn't faster
+    const len = Math.hypot(dx, dy);
+    dx = (dx / len) * P.speed * dt;
+    dy = (dy / len) * P.speed * dt;
+ 
+    // Move one axis at a time so the wizard can slide along walls later
+    if (!isBlocked(player.x + dx, player.y, player.w, player.h)) player.x += dx;
+    if (!isBlocked(player.x, player.y + dy, player.w, player.h)) player.y += dy;
+ 
+    // Keep the wizard on the canvas for now
+    player.x = constrain(player.x, 0, width - player.w);
+    player.y = constrain(player.y, 0, height - player.h);
+ 
+    // Flip between the two animation frames while walking
+    player.animTimer += dt;
+    if (player.animTimer >= P.frameTime) {
+      player.animTimer -= P.frameTime;
+      player.animFrame = 1 - player.animFrame;
+    }
+  } else {
+    // Standing still: rest on frame 1 (animFrame 0)
+    player.animFrame = 0;
+    player.animTimer = 0;
+  }
+}
+
+function drawPlayer() {
+  // ANIMATOR: this is where your art shows up. If assets/player_1.png and
+  // assets/player_2.png exist, they are drawn here automatically, one per
+  // animation frame, and the box below is skipped. Draw the wizard facing
+  // RIGHT; the push/translate/scale lines mirror it when he walks left.
+  const sprite = player.animFrame === 0 ? imgs.playerFrame1 : imgs.playerFrame2;
+ 
+  push();
+  // Move the origin to the wizard's horizontal center, then mirror
+  // horizontally when facing left (scale of -1 flips the x axis).
+  translate(player.x + player.w / 2, player.y);
+  scale(player.facing, 1);
+ 
+  if (sprite) {
+    // Drawn relative to the new origin, so (-w/2, 0) is the box's top-left.
+    image(sprite, -player.w / 2, 0, player.w, player.h);
+  } else {
+    // Placeholder box: color alternates with the animation frame
+    const c = player.animFrame === 0 ? CONFIG.colors.playerFrame1 : CONFIG.colors.playerFrame2;
+    fill(...c);
+    stroke(255);
+    strokeWeight(2);
+    rect(-player.w / 2, 0, player.w, player.h);
+ 
+    // Small "nose" on the right side so you can see the box flip when facing left
+    noStroke();
+    fill(...CONFIG.colors.playerNose);
+    rect(player.w / 2 - 16, player.h / 2 - 6, 12, 12);
+  }
+  pop();
+}
+
 
 // ---------------------------------------------------------------
 // Input
@@ -225,4 +343,10 @@ function mousePressed() {
 
 function keyPressed() {
   if (state === STATE.VIDEO) startLevel1();
+
+    if (state === STATE.LEVEL1 &&
+      [LEFT_ARROW, RIGHT_ARROW, UP_ARROW, DOWN_ARROW].includes(keyCode)) {
+    return false;
+  }
+
 }
