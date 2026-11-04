@@ -111,7 +111,7 @@ than starting menu and movement.
 
 *Did you split any stories that were too large for one sprint, or move stories back to the backlog? List them and say why.*
 
-_
+_We did not split any stories for this current sprint.
 
 ---
 
@@ -121,7 +121,7 @@ _
 
 | Action item | How it shows up in this sprint |
 |-------------|--------------------------------|
-|             |                                |
+|      N/A    |              N/A               |
 |             |                                |
 
 ---
@@ -130,15 +130,17 @@ _
 
 *What might stop the team from meeting the sprint goal? Which stories depend on others being finished first?*
 
-_
+Poor planning and communication will be the biggest 
+obstacle for meeting this current sprint goal. As of right now, however, none of our current stories 
+are dependent on one another. We can have basic movement, for example, without needing dungeon generation or a main menu. This is why it may be tempting for the team to work with minimal communication. This is not good because we still need to have a cohesive structure of the overall game, where all the components live, etc.
 
 ---
 
 ## 10. Checklist
 
-- [ ] Sprint goal written
-- [ ] Every committed story meets the Definition of Ready
-- [ ] Every story has an owner
-- [ ] Board updated: committed stories in the sprint, tasks created
-- [ ] Commitment compared to velocity
-- [ ] Report committed to `scrum/planning/` via pull request
+- [X] Sprint goal written
+- [X] Every committed story meets the Definition of Ready
+- [X] Every story has an owner
+- [X] Board updated: committed stories in the sprint, tasks created
+- [X] Commitment compared to velocity
+- [X] Report committed to `scrum/planning/` via pull request
