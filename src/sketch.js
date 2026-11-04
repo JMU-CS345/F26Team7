@@ -77,6 +77,7 @@ function setup() {
   introVideo.hide(); // we draw it on the canvas ourselves
   introVideo.elt.addEventListener("error", () => { videoFailed = true; });
   introVideo.elt.addEventListener("ended", startLevel1);
+  generateDungeon();
 }
 
 function draw() {
@@ -225,4 +226,19 @@ function mousePressed() {
 
 function keyPressed() {
   if (state === STATE.VIDEO) startLevel1();
+}
+
+function generateDungeon() {
+  let cols = 30;
+  let rows = 10;
+  let dungeon = [];
+  for (let y = 0; y < rows; y++) {
+    let row = [];
+
+    for (let x = 0; x < cols; x++) {
+      row.push(1);
+    }
+
+    dungeon.push(row);
+  }
 }
