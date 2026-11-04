@@ -69,11 +69,45 @@ let imgs = {};          // loaded images (null if missing)
 let gameFont = null;
 let introVideo;
 let videoFailed = false;
+const cols = 32;
+const rows = 18;
+const tileSize = 30;
+let dungeon = [];
 
 function loadOptionalImage(key, path) {
   imgs[key] = null;
   if (!path) return;
   loadImage(path, (img) => { imgs[key] = img; }, () => { imgs[key] = null; });
+}
+
+function generateDungeon() {
+  dungeon = [];
+
+    // Fill the entire map with walls
+    for (let y = 0; y < rows; y++) {
+        let row = [];
+
+        for (let x = 0; x < cols; x++) {
+            row.push(1);
+        }
+
+        dungeon.push(row);
+     }
+
+// Generate one random room
+    let roomWidth = floor(random(4, 9));
+    let roomHeight = floor(random(4, 8));
+
+    let roomX = floor(random(1, cols - roomWidth - 1));
+    let roomY = floor(random(1, rows - roomHeight - 1));
+
+    // Carve out the room
+    for (let y = roomY; y < roomY + roomHeight; y++) {
+        for (let x = roomX; x < roomX + roomWidth; x++) {
+            dungeon[y][x] = 0;
+        }
+    }
+
 }
 
 function preload() {
@@ -247,6 +281,8 @@ function createPlayer() {
     h: P.size,
     moving: false,
     facing: 1,      // 1 = facing right, -1 = facing left (drives the sprite flip)
+    lastAxis : "x", // last arrow key pressed
+    look: "side",
     animFrame: 0,   // 0 or 1: which of the two animation frames is showing
     animTimer: 0,
   };
@@ -266,18 +302,26 @@ function updatePlayer(dt) {
   if (keyIsDown(UP_ARROW)) dy -= 1;
   if (keyIsDown(DOWN_ARROW)) dy += 1;
  
-  player.moving = dx !== 0 || dy !== 0;
- 
-  // Face the way we're walking. Moving only up or down keeps the last
-  // left/right facing, and holding left+right together changes nothing.
-  if (dx < 0) player.facing = -1;
-  else if (dx > 0) player.facing = 1;
- 
-  if (player.moving) {
-    // Normalize so diagonal movement isn't faster
-    const len = Math.hypot(dx, dy);
-    dx = (dx / len) * P.speed * dt;
-    dy = (dy / len) * P.speed * dt;
+     // No diagonal movement: if a horizontal key and a vertical key are both
+   // held, only the one pressed most recently counts.
+   if (dx !== 0 && dy !== 0) {
+     if (player.lastAxis === "x") dy = 0;
+     else dx = 0;
+   }
+
+   player.moving = dx !== 0 || dy !== 0;
+
+   // Face the way we're walking. "facing" (left/right) drives the sprite flip and
+   // only changes on horizontal moves; "look" also tracks up/down for the nose.
+   if (dx < 0) { player.facing = -1; player.look = "side"; }
+   else if (dx > 0) { player.facing = 1; player.look = "side"; }
+   else if (dy < 0) player.look = "up";
+   else if (dy > 0) player.look = "down";
+
+   if (player.moving) {
+     // Only one of dx / dy is non-zero at this point
+     dx = dx * P.speed * dt;
+     dy = dy * P.speed * dt;
  
     // Move one axis at a time so the wizard can slide along walls later
     if (!isBlocked(player.x + dx, player.y, player.w, player.h)) player.x += dx;
@@ -324,10 +368,13 @@ function drawPlayer() {
     strokeWeight(2);
     rect(-player.w / 2, 0, player.w, player.h);
  
-    // Small "nose" on the right side so you can see the box flip when facing left
-    noStroke();
-    fill(...CONFIG.colors.playerNose);
-    rect(player.w / 2 - 16, player.h / 2 - 6, 12, 12);
+    // Small "nose" showing which way the box is looking. Left/right use the
+   // right edge (the flip above moves it to the left side when facing left).
+   noStroke();
+   fill(...CONFIG.colors.playerNose);
+   if (player.look === "up") rect(-6, 4, 12, 12);
+   else if (player.look === "down") rect(-6, player.h - 16, 12, 12);
+   else rect(player.w / 2 - 16, player.h / 2 - 6, 12, 12);
   }
   pop();
 }
@@ -343,7 +390,10 @@ function mousePressed() {
 
 function keyPressed() {
   if (state === STATE.VIDEO) startLevel1();
-
+       if (state === STATE.LEVEL1 && player) {
+     if (keyCode === LEFT_ARROW || keyCode === RIGHT_ARROW) player.lastAxis = "x";
+     if (keyCode === UP_ARROW || keyCode === DOWN_ARROW) player.lastAxis = "y";
+   }
     if (state === STATE.LEVEL1 &&
       [LEFT_ARROW, RIGHT_ARROW, UP_ARROW, DOWN_ARROW].includes(keyCode)) {
     return false;
