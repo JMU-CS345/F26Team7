@@ -172,13 +172,13 @@ function drawMenu() {
 }
 
 function playButtonHovered() {
-  const b = CONFIG.layout.button;
+  const b = { ...CONFIG.layout.button, x: width / 2 };
   return mouseX > b.x - b.w / 2 && mouseX < b.x + b.w / 2 &&
          mouseY > b.y - b.h / 2 && mouseY < b.y + b.h / 2;
 }
 
 function drawPlayButton() {
-  const b = CONFIG.layout.button;
+  const b = { ...CONFIG.layout.button, x: width / 2 };
   const hovered = playButtonHovered();
   cursor(hovered ? HAND : ARROW);
 
@@ -400,3 +400,4 @@ function keyPressed() {
   }
 
 }
+d
