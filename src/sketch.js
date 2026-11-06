@@ -18,7 +18,6 @@ const CONFIG = {
 
   assets: {
     menuBackground: "assets/menu_background.png", // 960x540
-    titleLogo:      "assets/title_logo.png",      // optional; replaces the text title
     playButton:     "assets/play_button.png",     // optional
     playButtonHover:"assets/play_button_hover.png", // optional
     introVideo:     "assets/intro.mp4",
@@ -121,7 +120,7 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
+  
   introVideo = createVideo(CONFIG.assets.introVideo);
   introVideo.hide(); // we draw it on the canvas ourselves
   introVideo.elt.addEventListener("error", () => { videoFailed = true; });
