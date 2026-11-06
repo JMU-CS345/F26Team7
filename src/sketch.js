@@ -120,7 +120,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(CONFIG.canvasW, CONFIG.canvasH);
+  createCanvas(windowWidth, windowHeight);
 
   introVideo = createVideo(CONFIG.assets.introVideo);
   introVideo.hide(); // we draw it on the canvas ourselves
