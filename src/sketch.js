@@ -13,9 +13,6 @@ const CONFIG = {
   canvasW: 960,
   canvasH: 540,
 
-  title: "MageQuest",
-  credits: "created by Z, Nate, Victor, and Mamadou",
-
   assets: {
     menuBackground: "assets/menu_background.png", // 960x540
     playButton:     "assets/play_button.png",     // optional
@@ -31,7 +28,7 @@ const CONFIG = {
   layout: {
     titleY: 180,
     creditsY: 250,
-    button: { x: 480, y: 360, w: 220, h: 70 },
+    button: { x: 480, y: 565, w: 220, h: 70 },
   },
   
   player: {
