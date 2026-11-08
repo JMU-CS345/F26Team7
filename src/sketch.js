@@ -79,6 +79,8 @@ const cols = 32;
 const rows = 18;
 const tileSize = 30;
 let dungeon = [];
+let floorNumber = 1;
+let transition = createTransition();
 
 function loadOptionalImage(key, path) {
   imgs[key] = null;
@@ -263,7 +265,12 @@ function drawLevel1() {
 
   const dt = Math.min(deltaTime / 1000, 0.05);
 
-  updatePlayer(dt);
+  // --- UPDATE: the player is frozen while the screen is fading ---
+  if (!transition.active) {
+    updatePlayer(dt);
+    if (hasReachedDoor(player.y, getRoom().innerY, CONFIG.room.border)) startTransition(transition);
+  }
+  if (updateTransition(transition, dt, TRANSITION_TIMES)) goToNextFloor();
 
   // --- WORLD: drawn every frame, in this order ---
   if (imgs.level1Background) image(imgs.level1Background, 0, 0, width, height);
@@ -274,13 +281,31 @@ function drawLevel1() {
   // --- PLAYER: always drawn after the world so it sits on top ---
   drawPlayer();
 
-  // Small status label (delete when real level 1 work begins)
+  // Status label (delete when real level 1 work begins)
   fill(255, 160);
   noStroke();
   textAlign(LEFT, TOP);
   textSize(16);
-  text("Level 1 Under Construction - arrow keys to move", 12, 10);
+  text("Floor " + floorNumber + " - arrow keys to move", 12, 10);
+
+  // --- TRANSITION: always last, so the black flash covers everything ---
+  drawTransition();
 }
+
+function goToNextFloor() {
+  floorNumber++;
+  createPlayer(); // puts the player back in the middle of the room
+  // later: generate a new room layout here
+}
+
+function drawTransition() {
+  const a = transitionAlpha(transition, TRANSITION_TIMES);
+  if (a <= 0) return;
+  noStroke();
+  fill(0, a * 255);
+  rect(0, 0, width, height);
+}
+
 
 // Works out where the room sits. The door is a gap in the top wall.
 function getRoom() {
