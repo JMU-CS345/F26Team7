@@ -13,15 +13,11 @@ const CONFIG = {
   canvasW: 960,
   canvasH: 540,
 
-  title: "MageQuest",
-  credits: "created by Z, Nate, Victor, and Mamadou",
-
   assets: {
     menuBackground: "assets/menu_background.png", // 960x540
-    titleLogo: "assets/title_logo.png",      // optional; replaces the text title
-    playButton: "assets/play_button.png",     // optional
-    playButtonHover: "assets/play_button_hover.png", // optional
-    introVideo: "assets/intro.mp4",
+    playButton:     "assets/play_button.png",     // optional
+    playButtonHover:"assets/play_button_hover.png", // optional
+    introVideo:     "assets/intro.mp4",
     level1Background: "assets/level1_background.png", // optional
     playerFrame1: "assets/player_1.png", // optional; walking frame 1
     playerFrame2: "assets/player_2.png", // optional walking frame 2
@@ -34,7 +30,7 @@ const CONFIG = {
   layout: {
     titleY: 180,
     creditsY: 250,
-    button: { x: 480, y: 360, w: 220, h: 70 },
+    button: { x: 480, y: 565, w: 220, h: 70 },
   },
 
   player: {
@@ -135,7 +131,7 @@ function isDirtyTile(col, row) {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
+  
   introVideo = createVideo(CONFIG.assets.introVideo);
   introVideo.hide(); // we draw it on the canvas ourselves
   introVideo.elt.addEventListener("error", () => { videoFailed = true; });
@@ -186,13 +182,13 @@ function drawMenu() {
 }
 
 function playButtonHovered() {
-  const b = CONFIG.layout.button;
+  const b = { ...CONFIG.layout.button, x: width / 2 };
   return mouseX > b.x - b.w / 2 && mouseX < b.x + b.w / 2 &&
     mouseY > b.y - b.h / 2 && mouseY < b.y + b.h / 2;
 }
 
 function drawPlayButton() {
-  const b = CONFIG.layout.button;
+  const b = { ...CONFIG.layout.button, x: width / 2 };
   const hovered = playButtonHovered();
   cursor(hovered ? HAND : ARROW);
 
@@ -465,3 +461,4 @@ function keyPressed() {
   }
 
 }
+d
