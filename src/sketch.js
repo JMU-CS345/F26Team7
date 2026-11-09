@@ -92,7 +92,7 @@ function level1() {
 }
 
 function generateDungeon() {
-  alive_probability = 0.16;
+  alive_probability = 0.25;
   door_creation = 0.1;
   door_made = false;
   // initial generation
@@ -144,6 +144,22 @@ function generateDungeon() {
           current_birth_points += 1;
         }
         if (map[i + 1][j] == 1) {
+          current_survival_points += 1;
+          current_birth_points += 1;
+        }
+        if (map[i + 1][j + 1] == 1) {
+          current_survival_points += 1;
+          current_birth_points += 1;
+        }
+        if (map[i + 1][j - 1] == 1) {
+          current_survival_points += 1;
+          current_birth_points += 1;
+        }
+        if (map[i - 1][j + 1] == 1) {
+          current_survival_points += 1;
+          current_birth_points += 1;
+        }
+        if (map[i - 1][j - 1] == 1) {
           current_survival_points += 1;
           current_birth_points += 1;
         }
