@@ -36,6 +36,7 @@ const CONFIG = {
   player: {
     size: 48,          // width and height in pixels (placeholder box / sprite size)
     speed: 220,        // pixels per second
+    maxHealth: 100,    // maximum health for the player
     frameTime: 0.25,   // seconds each animation frame is shown while walking
     startX: 456,       // top-left start position
     startY: 246,
@@ -306,7 +307,6 @@ function drawTransition() {
   rect(0, 0, width, height);
 }
 
-
 // Works out where the room sits. The door is a gap in the top wall.
 function getRoom() {
   const R = CONFIG.room;
@@ -351,17 +351,54 @@ function drawRoom() {
 function createPlayer() {
   const P = CONFIG.player;
   const r = getRoom();
+  const maxHealth = Math.max(1, P.maxHealth);
   player = {
     x: r.innerX + r.innerW / 2 - P.size / 2,
     y: r.innerY + r.innerH / 2 - P.size / 2,
     w: P.size,
     h: P.size,
+    maxHealth: maxHealth,
+    health: maxHealth,
     moving: false,
     facing: 1, 
     lastAxis: "x", 
     look: "side",
     animFrame: 0,
     animTimer: 0,
+
+    // Health is kept on the player object so a health bar can read it later
+    // without coupling the player's gameplay state to its presentation.
+    takeDamage(amount) {
+      if (!Number.isFinite(amount) || amount < 0) {
+        console.error("Player damage must be a non-negative number:", amount);
+        return 0;
+      }
+      const previousHealth = this.health;
+      this.health = Math.max(0, this.health - amount);
+      return previousHealth - this.health;
+    },
+
+    heal(amount) {
+      if (!Number.isFinite(amount) || amount < 0) {
+        console.error("Player healing must be a non-negative number:", amount);
+        return 0;
+      }
+      const previousHealth = this.health;
+      this.health = Math.min(this.maxHealth, this.health + amount);
+      return this.health - previousHealth;
+    },
+
+    resetHealth() {
+      this.health = this.maxHealth;
+    },
+
+    getHealthRatio() {
+      return this.health / this.maxHealth;
+    },
+
+    isDead() {
+      return this.health <= 0;
+    },
   };
 }
 
@@ -379,6 +416,13 @@ function isBlocked(x, y, w, h) {
 }
 
 function updatePlayer(dt) {
+  if (player.isDead()) {
+    player.moving = false;
+    player.animFrame = 0;
+    player.animTimer = 0;
+    return;
+  }
+
   const P = CONFIG.player;
 
   let dx = 0;
@@ -486,4 +530,3 @@ function keyPressed() {
   }
 
 }
-d
