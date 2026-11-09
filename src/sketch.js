@@ -18,7 +18,7 @@ const CONFIG = {
     playButton:     "assets/play_button.png",     // optional
     playButtonHover:"assets/play_button_hover.png", // optional
     introVideo:     "assets/intro.mp4",
-    deathScreen: "assets/death_screen.png", // optional; drawn after the player dies
+    deathScreen: "assets/deathScreen.png", // temporary test image; replace with the death screen image later
     level1Background: "assets/level1_background.png", // optional
     playerFrame1: "assets/player_1.png", // optional; walking frame 1
     playerFrame2: "assets/player_2.png", // optional walking frame 2
@@ -38,6 +38,7 @@ const CONFIG = {
     size: 48,          // width and height in pixels (placeholder box / sprite size)
     speed: 220,        // pixels per second
     maxHealth: 100,    // maximum health for the player
+    damageFlashDuration: 0.2, // seconds the player flashes red after taking damage
     frameTime: 0.25,   // seconds each animation frame is shown while walking
     startX: 456,       // top-left start position
     startY: 246,
@@ -380,6 +381,7 @@ function createPlayer() {
     h: P.size,
     maxHealth: maxHealth,
     health: maxHealth,
+    damageFlashTimer: 0,
     moving: false,
     facing: 1, 
     lastAxis: "x", 
@@ -396,7 +398,9 @@ function createPlayer() {
       }
       const previousHealth = this.health;
       this.health = Math.max(0, this.health - amount);
-      return previousHealth - this.health;
+      const damageTaken = previousHealth - this.health;
+      if (damageTaken > 0) this.damageFlashTimer = P.damageFlashDuration;
+      return damageTaken;
     },
 
     heal(amount) {
@@ -437,6 +441,8 @@ function isBlocked(x, y, w, h) {
 }
 
 function updatePlayer(dt) {
+  player.damageFlashTimer = Math.max(0, player.damageFlashTimer - dt);
+
   if (player.isDead()) {
     player.moving = false;
     player.animFrame = 0;
@@ -507,13 +513,17 @@ function drawPlayer() {
   // horizontally when facing left (scale of -1 flips the x axis).
   translate(player.x + player.w / 2, player.y);
   scale(player.facing, 1);
+  const damageFlashActive = player.damageFlashTimer > 0;
+  if (damageFlashActive) tint(255, 0, 0);
 
   if (sprite) {
     // Drawn relative to the new origin, so (-w/2, 0) is the box's top-left.
     image(sprite, -player.w / 2, 0, player.w, player.h);
   } else {
     // Placeholder box: color alternates with the animation frame
-    const c = player.animFrame === 0 ? CONFIG.colors.playerFrame1 : CONFIG.colors.playerFrame2;
+    const c = damageFlashActive
+      ? [255, 0, 0]
+      : (player.animFrame === 0 ? CONFIG.colors.playerFrame1 : CONFIG.colors.playerFrame2);
     fill(...c);
     stroke(255);
     strokeWeight(2);
@@ -527,6 +537,7 @@ function drawPlayer() {
     else if (player.look === "down") rect(-6, player.h - 16, 12, 12);
     else rect(player.w / 2 - 16, player.h / 2 - 6, 12, 12);
   }
+  if (damageFlashActive) noTint();
   pop();
 }
 
