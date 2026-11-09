@@ -18,6 +18,7 @@ const CONFIG = {
     playButton:     "assets/play_button.png",     // optional
     playButtonHover:"assets/play_button_hover.png", // optional
     introVideo:     "assets/intro.mp4",
+    deathScreen: "assets/death_screen.png", // optional; drawn after the player dies
     level1Background: "assets/level1_background.png", // optional
     playerFrame1: "assets/player_1.png", // optional; walking frame 1
     playerFrame2: "assets/player_2.png", // optional walking frame 2
@@ -68,7 +69,7 @@ const CONFIG = {
 // ---------------------------------------------------------------
 // Game state
 // ---------------------------------------------------------------
-const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1" };
+const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1", DEATH: "death" };
 let state = STATE.MENU;
 let level1Initialized = false;
 let player;
@@ -120,7 +121,7 @@ function generateDungeon() {
 }
 
 function preload() {
-  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "level1Background", "playerFrame1", "playerFrame2", "wallTile", "dirtyWallTile"]) {
+  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "deathScreen", "level1Background", "playerFrame1", "playerFrame2", "wallTile", "dirtyWallTile"]) {
     loadOptionalImage(key, CONFIG.assets[key]);
   }
   if (CONFIG.assets.font) {
@@ -146,6 +147,7 @@ function draw() {
     if (state === STATE.MENU) drawMenu();
     else if (state === STATE.VIDEO) drawVideo();
     else if (state === STATE.LEVEL1) drawLevel1();
+    else if (state === STATE.DEATH) drawDeathScreen();
   } catch (e) {
     console.error("draw() failed while in state:", state, e);
     noLoop();
@@ -269,6 +271,10 @@ function drawLevel1() {
   // --- UPDATE: the player is frozen while the screen is fading ---
   if (!transition.active) {
     updatePlayer(dt);
+    if (player.isDead()) {
+      startDeathScreen();
+      return;
+    }
     if (hasReachedDoor(player.y, getRoom().innerY, CONFIG.room.border)) startTransition(transition);
   }
   if (updateTransition(transition, dt, TRANSITION_TIMES)) goToNextFloor();
@@ -291,6 +297,21 @@ function drawLevel1() {
 
   // --- TRANSITION: always last, so the black flash covers everything ---
   drawTransition();
+}
+
+function startDeathScreen() {
+  if (state === STATE.DEATH) return;
+  state = STATE.DEATH;
+  console.log("Player died");
+}
+
+function drawDeathScreen() {
+  if (imgs.deathScreen) {
+    image(imgs.deathScreen, 0, 0, width, height);
+    return;
+  }
+
+  background(...CONFIG.colors.background);
 }
 
 function goToNextFloor() {
