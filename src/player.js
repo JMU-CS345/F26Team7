@@ -1,54 +1,82 @@
 class Player {
-    constructor(image0, image1, x, y){
+    constructor(image0_left, image1_left, image2_left, 
+        image0_right, image1_right, image2_right, 
+        mage_down, mage_up,
+        x, y, v){
         this.speed = 4;
-        this.frames = [image0, image1];
+        this.frames = [image0_left, image1_left, image2_left, 
+        image0_right, image1_right, image2_right, mage_down, mage_up];
         this.current_image = 0;
         this.x = x;
         this.y = y;
-        this.count = 10;
+        this.count = 7;
+        this.movement = createVector(0,0);
+  
     }
-    update() {
-        let movement = createVector(0,0);
-        
-        if(keyIsPressed){
-            switch (key) {
-                case 'ArrowUp':
-                    movement.y -= 1;
-                    console.log(this.count);
-                break;
-                case 'ArrowDown':
-                    movement.y += 1;
-                break;
-                case 'ArrowLeft':
-                    this.count -= 1;
-                    if (this.count == 0){
-                        this.count = 25;
-                        this.current_image += 1;
-                    }
-                    movement.x -= 1;
-                break;
-                case 'ArrowRight':
-                    this.count -= 1;
-                    if (this.count == 0){
-                        this.count = 25;
-                        this.current_image += 1;
-                    }
-                    movement.x += 1;
-                break;
+    
+    moveUp() {
+        if (this.y <= 0){
+            return;
+        }
+        this.current_image = 7;
+        this.count -= 1;
+        this.y -= this.speed;
+    }
+    moveDown() {
+        if (this.y > windowHeight - 100){
+            return;
+        }
+        this.current_image = 6;
+        this.count -= 1;
+        this.y += this.speed;
+    }
+    moveLeft() {
+        if (this.x <= 0){
+            return;
+        }
+        this.count -= 1;
+        //immediately flips the mage if it was facing right
+        if (this.current_image > 2){
+            this.current_image = 0;
+        }
+        if (this.count == 0) {
+            if (this.current_image >= 2 
+            ){
+                this.current_image = 0;
+            } else {
+                this.current_image += 1;
             }
         }
-        if (this.current_image > 1){
-                this.current_image = 0;
+        this.x -= this.speed;
+    }
+    moveRight() {
+        if (this.x >= windowWidth - 100){
+            return;
         }
-        movement.setMag(this.speed); // sets move speed
-        this.x += movement.x; // updates position x
-        this.y += movement.y; // updates position y
+        this.count -= 1;
+         //immediately flips the mage if it was facing left
+        if (this.current_image <= 2){
+            this.current_image = 3;
+        }
+        if (this.count == 0) {
+            if (this.current_image < 3 ||
+                this.current_image >= 5){
+
+                this.current_image = 3;
+            } else {
+                this.current_image += 1;
+            }
+        }
+        this.x += this.speed;
+    }
+    update() {
+        if (this.count == 0) {
+            this.count = 7;
+        }
     }
 
     draw() {
     image(this.frames[this.current_image], this.x, this.y, 100,100);
-      
-      
     }
 
 }

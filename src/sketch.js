@@ -1,10 +1,23 @@
-
 var scene_num; // Start menu, level 1, etc. Start is 0.
 function setup() {
   start_pic = loadImage ('assets/menu_background.png');
-  mage_walking_0 = loadImage ('assets/player_left.png');
-  mage_walking_1 = loadImage ('assets/player_right.png');
-  player = new Player(mage_walking_0, mage_walking_1, windowWidth/2, windowHeight/2);
+  // player character moving left sprites
+  mage_walking_left_0 = loadImage ('assets/mage_left.png');
+  mage_walking_left_1 = loadImage ('assets/mage_step_1.png');
+  mage_walking_left_2 = loadImage ('assets/mage_step_2.png');
+  //player character moving right sprites
+  mage_walking_right_0 = loadImage ('assets/mage_right.png');
+  mage_walking_right_1 = loadImage ('assets/mage_right_step_1.png');
+  mage_walking_right_2 = loadImage ('assets/mage_right_step_2.png');
+  // player character moving up
+  mage_down = loadImage ('assets/mage_down.png');
+  // player character moving down
+  mage_up = loadImage ('assets/player_up.png');
+  //create player
+  player = new Player(mage_walking_left_0, mage_walking_left_1, mage_walking_left_2,
+    mage_walking_right_0, mage_walking_right_1, mage_walking_right_2,
+    mage_down, mage_up,
+    windowWidth/2, windowHeight/2);
   scene_num = 0; // game has not begun yet.
   createCanvas (windowWidth, windowHeight);
 }
@@ -15,7 +28,7 @@ function draw() {
     loadMainMenu();
     break;
     case 1:
-    loadMovementTest();
+    movePlayer();
     break;
   }
 }
@@ -46,11 +59,27 @@ function loadMainMenu(){
   text ("Play", (windowWidth/2.3) + 50, windowHeight/1.3 + 40);
 }
 
-function loadMovementTest(){
+function movePlayer(){
   clear();
   background(220);
+  if(keyIsDown(UP_ARROW)){
+      player.moveUp();
+  }
+  else if (keyIsDown(DOWN_ARROW)) {
+      player.moveDown();
+  }
+  else if(keyIsDown(RIGHT_ARROW)){
+      player.moveRight();
+  }
+  else if (keyIsDown(LEFT_ARROW)) {
+      player.moveLeft();
+  }
   player.update();
   player.draw();
+  
 }
+
+
+
 
 
