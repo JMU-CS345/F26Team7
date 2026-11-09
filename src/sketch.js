@@ -18,6 +18,7 @@ const CONFIG = {
     playButton:     "assets/play_button.png",     // optional
     playButtonHover:"assets/play_button_hover.png", // optional
     introVideo:     "assets/intro.mp4",
+    deathScreen: "assets/deathScreen.png", // temporary test image; replace with the death screen image later
     level1Background: "assets/level1_background.png", // optional
     playerFrame1: "assets/player_1.png", // optional; walking frame 1
     playerFrame2: "assets/player_2.png", // optional walking frame 2
@@ -37,6 +38,7 @@ const CONFIG = {
     size: 48,          // width and height in pixels (placeholder box / sprite size)
     speed: 220,        // pixels per second
     maxHealth: 100,    // maximum health for the player
+    damageFlashDuration: 0.2, // seconds the player flashes red after taking damage
     frameTime: 0.25,   // seconds each animation frame is shown while walking
     startX: 456,       // top-left start position
     startY: 246,
@@ -68,7 +70,7 @@ const CONFIG = {
 // ---------------------------------------------------------------
 // Game state
 // ---------------------------------------------------------------
-const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1" };
+const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1", DEATH: "death" };
 let state = STATE.MENU;
 let level1Initialized = false;
 let player;
@@ -120,7 +122,7 @@ function generateDungeon() {
 }
 
 function preload() {
-  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "level1Background", "playerFrame1", "playerFrame2", "wallTile", "dirtyWallTile"]) {
+  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "deathScreen", "level1Background", "playerFrame1", "playerFrame2", "wallTile", "dirtyWallTile"]) {
     loadOptionalImage(key, CONFIG.assets[key]);
   }
   if (CONFIG.assets.font) {
@@ -146,6 +148,7 @@ function draw() {
     if (state === STATE.MENU) drawMenu();
     else if (state === STATE.VIDEO) drawVideo();
     else if (state === STATE.LEVEL1) drawLevel1();
+    else if (state === STATE.DEATH) drawDeathScreen();
   } catch (e) {
     console.error("draw() failed while in state:", state, e);
     noLoop();
@@ -269,6 +272,10 @@ function drawLevel1() {
   // --- UPDATE: the player is frozen while the screen is fading ---
   if (!transition.active) {
     updatePlayer(dt);
+    if (player.isDead()) {
+      startDeathScreen();
+      return;
+    }
     if (hasReachedDoor(player.y, getRoom().innerY, CONFIG.room.border)) startTransition(transition);
   }
   if (updateTransition(transition, dt, TRANSITION_TIMES)) goToNextFloor();
@@ -291,6 +298,21 @@ function drawLevel1() {
 
   // --- TRANSITION: always last, so the black flash covers everything ---
   drawTransition();
+}
+
+function startDeathScreen() {
+  if (state === STATE.DEATH) return;
+  state = STATE.DEATH;
+  console.log("Player died");
+}
+
+function drawDeathScreen() {
+  if (imgs.deathScreen) {
+    image(imgs.deathScreen, 0, 0, width, height);
+    return;
+  }
+
+  background(...CONFIG.colors.background);
 }
 
 function goToNextFloor() {
@@ -359,6 +381,7 @@ function createPlayer() {
     h: P.size,
     maxHealth: maxHealth,
     health: maxHealth,
+    damageFlashTimer: 0,
     moving: false,
     facing: 1, 
     lastAxis: "x", 
@@ -375,7 +398,9 @@ function createPlayer() {
       }
       const previousHealth = this.health;
       this.health = Math.max(0, this.health - amount);
-      return previousHealth - this.health;
+      const damageTaken = previousHealth - this.health;
+      if (damageTaken > 0) this.damageFlashTimer = P.damageFlashDuration;
+      return damageTaken;
     },
 
     heal(amount) {
@@ -416,6 +441,8 @@ function isBlocked(x, y, w, h) {
 }
 
 function updatePlayer(dt) {
+  player.damageFlashTimer = Math.max(0, player.damageFlashTimer - dt);
+
   if (player.isDead()) {
     player.moving = false;
     player.animFrame = 0;
@@ -486,13 +513,17 @@ function drawPlayer() {
   // horizontally when facing left (scale of -1 flips the x axis).
   translate(player.x + player.w / 2, player.y);
   scale(player.facing, 1);
+  const damageFlashActive = player.damageFlashTimer > 0;
+  if (damageFlashActive) tint(255, 0, 0);
 
   if (sprite) {
     // Drawn relative to the new origin, so (-w/2, 0) is the box's top-left.
     image(sprite, -player.w / 2, 0, player.w, player.h);
   } else {
     // Placeholder box: color alternates with the animation frame
-    const c = player.animFrame === 0 ? CONFIG.colors.playerFrame1 : CONFIG.colors.playerFrame2;
+    const c = damageFlashActive
+      ? [255, 0, 0]
+      : (player.animFrame === 0 ? CONFIG.colors.playerFrame1 : CONFIG.colors.playerFrame2);
     fill(...c);
     stroke(255);
     strokeWeight(2);
@@ -506,6 +537,7 @@ function drawPlayer() {
     else if (player.look === "down") rect(-6, player.h - 16, 12, 12);
     else rect(player.w / 2 - 16, player.h / 2 - 6, 12, 12);
   }
+  if (damageFlashActive) noTint();
   pop();
 }
 
