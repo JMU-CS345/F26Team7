@@ -1,5 +1,6 @@
 var scene_num; // Start menu, level 1, etc. Start is 0.
 function setup() {
+  test_background_pic = loadImage ('assets/floor_test.png');
   start_pic = loadImage ('assets/menu_background.png');
   // player character moving left sprites
   mage_walking_left_0 = loadImage ('assets/mage_left.png');
@@ -20,6 +21,8 @@ function setup() {
     windowWidth/2, windowHeight/2);
   scene_num = 0; // game has not begun yet.
   createCanvas (windowWidth, windowHeight);
+  not_generated = true;
+  map = [];
 }
 
 function draw() {
@@ -28,7 +31,7 @@ function draw() {
     loadMainMenu();
     break;
     case 1:
-    movePlayer();
+    level1();
     break;
   }
 }
@@ -60,8 +63,6 @@ function loadMainMenu(){
 }
 
 function movePlayer(){
-  clear();
-  background(220);
   if(keyIsDown(UP_ARROW)){
       player.moveUp();
   }
@@ -76,8 +77,109 @@ function movePlayer(){
   }
   player.update();
   player.draw();
-  
 }
+
+function level1() {
+  
+  clear();
+  background(0);
+  if (not_generated){
+    generateDungeon();
+    not_generated = false;
+  }
+  drawDungeon();
+  movePlayer();
+}
+
+function generateDungeon() {
+  alive_probability = 0.16;
+  door_creation = 0.1;
+  door_made = false;
+  // initial generation
+  for (let i = 0; i < 20; i++){
+    map[i] = [];
+    for (let j = 0; j < 20; j++) {
+      if (Math.random() < alive_probability
+      || i == 0 || j == 0 || i == 19 || j == 19){
+       map[i][j] = 1;
+      }
+      else{
+        map[i][j] = 0;
+      }
+    }
+  }
+  let side_for_door = Math.random();
+  let random_num = Math.floor(Math.random() * (18 - 1 + 1)) + 1;
+  if (side_for_door <= 0.25){
+    map[0][random_num] = 2;
+  }
+  else if (side_for_door > 0.25 && side_for_door <= 0.5){
+    map[19][random_num] = 2;
+  }
+  else if (side_for_door > 0.5 && side_for_door <= 0.75){
+    map[random_num][0] = 2;
+  }
+  else {
+    map[random_num][19] = 2;
+  }
+  let iterations = 10;
+  let birth_threshold = 1;
+  let survival_threshold = 2;
+  let current_survival_points = 0;
+  let current_birth_points = 0;
+  while (iterations != 0)
+  {
+    for (let i = 1; i < 19; i++){
+      for (let j = 1; j < 19; j++) {
+        if (map[i][j - 1] == 1) {
+          current_survival_points += 1;
+          current_birth_points += 1;
+        }
+        if (map[i][j + 1] == 1) {
+          current_survival_points += 1;
+          current_birth_points += 1;
+        }
+        if (map[i - 1][j] == 1) {
+          current_survival_points += 1;
+          current_birth_points += 1;
+        }
+        if (map[i + 1][j] == 1) {
+          current_survival_points += 1;
+          current_birth_points += 1;
+        }
+        if (map[i][j] == 0 && current_birth_points >= birth_threshold){
+          map[i][j] == 1;
+        }
+        if (map[i][j] == 1 && current_survival_points < survival_threshold){
+          map[i][j] == 0;
+        }
+        current_survival_points = 0;
+        current_birth_points = 0;
+      }
+    }
+   iterations -= 1;
+  }
+}
+
+function drawDungeon(){
+  for (let i = 0; i < 20; i++){
+    for (let j = 0; j < 20; j++) {
+      if (map[i][j] == 1){
+       fill("black");
+       rect(i*35, j*35, 35, 35);
+      }
+      else if (map[i][j] == 2){
+        fill("brown");
+        rect(i*35, j*35, 35, 35);
+      }
+      else {
+        fill("green");
+        rect(i*35, j*35, 35, 35);
+      }
+    }
+  }
+}
+
 
 
 
