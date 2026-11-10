@@ -92,16 +92,14 @@ function level1() {
 }
 
 function generateDungeon() {
-  alive_probability = 0.25;
-  door_creation = 0.1;
-  door_made = false;
+  alive_probability = 0.15;
   // initial generation
   for (let i = 0; i < 20; i++){
     map[i] = [];
     for (let j = 0; j < 20; j++) {
       if (Math.random() < alive_probability
       || i == 0 || j == 0 || i == 19 || j == 19){
-       map[i][j] = 1;
+        map[i][j] = 1;
       }
       else{
         map[i][j] = 0;
@@ -112,17 +110,21 @@ function generateDungeon() {
   let random_num = Math.floor(Math.random() * (18 - 1 + 1)) + 1;
   if (side_for_door <= 0.25){
     map[0][random_num] = 2;
+    map[1][random_num] = 0;
   }
   else if (side_for_door > 0.25 && side_for_door <= 0.5){
     map[19][random_num] = 2;
+    map[18][random_num] = 0;
   }
   else if (side_for_door > 0.5 && side_for_door <= 0.75){
     map[random_num][0] = 2;
+    map[random_num][1] = 0;
   }
   else {
     map[random_num][19] = 2;
+    map[random_num][18] = 0;
   }
-  let iterations = 10;
+  let iterations = 90;
   let birth_threshold = 1;
   let survival_threshold = 2;
   let current_survival_points = 0;
@@ -135,33 +137,72 @@ function generateDungeon() {
           current_survival_points += 1;
           current_birth_points += 1;
         }
-        if (map[i][j + 1] == 1) {
+        else if (map[i][j + 1] == 1) {
           current_survival_points += 1;
           current_birth_points += 1;
         }
-        if (map[i - 1][j] == 1) {
+        else if (map[i - 1][j] == 1) {
           current_survival_points += 1;
           current_birth_points += 1;
         }
-        if (map[i + 1][j] == 1) {
+        else if (map[i + 1][j] == 1) {
           current_survival_points += 1;
           current_birth_points += 1;
         }
-        if (map[i + 1][j + 1] == 1) {
+        else if (map[i + 1][j + 1] == 1) {
           current_survival_points += 1;
           current_birth_points += 1;
         }
-        if (map[i + 1][j - 1] == 1) {
+        else if (map[i + 1][j - 1] == 1) {
           current_survival_points += 1;
           current_birth_points += 1;
         }
-        if (map[i - 1][j + 1] == 1) {
+        else if (map[i - 1][j + 1] == 1) {
           current_survival_points += 1;
           current_birth_points += 1;
         }
-        if (map[i - 1][j - 1] == 1) {
+        else if (map[i - 1][j - 1] == 1) {
           current_survival_points += 1;
           current_birth_points += 1;
+        }
+        else if (map[i][j] == 0 && current_birth_points >= birth_threshold){
+          map[i][j] == 1;
+        }
+        else if (map[i][j] == 1 && current_survival_points < survival_threshold){
+          map[i][j] == 0;
+        }
+        // check if near door
+        if (map[i][j - 1] == 2) {
+          current_survival_points = -8;
+          current_birth_points = -8;
+        }
+        else if (map[i][j + 1] == 2) {
+          current_survival_points = -8;
+          current_birth_points = -8;
+        }
+        else if (map[i - 1][j] == 2) {
+          current_survival_points = -8;
+          current_birth_points = -8;
+        }
+        else if (map[i + 1][j] == 2) {
+          current_survival_points = -8;
+          current_birth_points = -8;
+        }
+        else if (map[i + 1][j + 1] == 2) {
+          current_survival_points = -8;
+          current_birth_points = -8;
+        }
+        else if (map[i + 1][j - 1] == 2) {
+          current_survival_points = -8;
+          current_birth_points = -8;
+        }
+        else if (map[i - 1][j + 1] == 2) {
+          current_survival_points = -8;
+          current_birth_points = -8;
+        }
+        else if (map[i - 1][j - 1] == 2) {
+          current_survival_points = -8;
+          current_birth_points += -8;
         }
         if (map[i][j] == 0 && current_birth_points >= birth_threshold){
           map[i][j] == 1;
