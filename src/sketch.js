@@ -1,6 +1,5 @@
 var scene_num; // Start menu, level 1, etc. Start is 0.
 function setup() {
-  test_background_pic = loadImage ('assets/floor_test.png');
   start_pic = loadImage ('assets/menu_background.png');
   // player character moving left sprites
   mage_walking_left_0 = loadImage ('assets/mage_left.png');
@@ -23,6 +22,7 @@ function setup() {
   createCanvas (windowWidth, windowHeight);
   not_generated = true;
   map = [];
+  map_of_squares = [];
 }
 
 function draw() {
@@ -64,16 +64,17 @@ function loadMainMenu(){
 
 function movePlayer(){
   if(keyIsDown(UP_ARROW)){
-      player.moveUp();
+      player.moveUp(map_of_squares);
   }
   else if (keyIsDown(DOWN_ARROW)) {
-      player.moveDown();
+    player.moveDown(map_of_squares);
   }
   else if(keyIsDown(RIGHT_ARROW)){
-      player.moveRight();
+      player.moveRight(map_of_squares);
   }
   else if (keyIsDown(LEFT_ARROW)) {
-      player.moveLeft();
+    player.moveLeft(map_of_squares);
+    
   }
   player.update();
   player.draw();
@@ -91,14 +92,29 @@ function level1() {
   movePlayer();
 }
 
+class Rectangle {
+  constructor(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  }
+  getX(){
+    return this.x;
+  }
+  getY(){
+    return this.y;
+  }
+}
+
 function generateDungeon() {
   alive_probability = 0.15;
   // initial generation
-  for (let i = 0; i < 20; i++){
+  for (let i = 0; i < 12; i++){
     map[i] = [];
     for (let j = 0; j < 20; j++) {
       if (Math.random() < alive_probability
-      || i == 0 || j == 0 || i == 19 || j == 19){
+      || i == 0 || j == 0 || i == 11 || j == 19){
         map[i][j] = 1;
       }
       else{
@@ -106,24 +122,9 @@ function generateDungeon() {
       }
     }
   }
-  let side_for_door = Math.random();
-  let random_num = Math.floor(Math.random() * (18 - 1 + 1)) + 1;
-  if (side_for_door <= 0.25){
-    map[0][random_num] = 2;
-    map[1][random_num] = 0;
-  }
-  else if (side_for_door > 0.25 && side_for_door <= 0.5){
-    map[19][random_num] = 2;
-    map[18][random_num] = 0;
-  }
-  else if (side_for_door > 0.5 && side_for_door <= 0.75){
-    map[random_num][0] = 2;
-    map[random_num][1] = 0;
-  }
-  else {
-    map[random_num][19] = 2;
-    map[random_num][18] = 0;
-  }
+  //create door
+  map[0][11] = 2;
+  //run birth/survival sim
   let iterations = 90;
   let birth_threshold = 1;
   let survival_threshold = 2;
@@ -131,7 +132,7 @@ function generateDungeon() {
   let current_birth_points = 0;
   while (iterations != 0)
   {
-    for (let i = 1; i < 19; i++){
+    for (let i = 1; i < 11; i++){
       for (let j = 1; j < 19; j++) {
         if (map[i][j - 1] == 1) {
           current_survival_points += 1;
@@ -219,22 +220,23 @@ function generateDungeon() {
 }
 
 function drawDungeon(){
-  for (let i = 0; i < 20; i++){
+  let black_square_count = 0;
+  for (let i = 0; i < 12; i++){
     for (let j = 0; j < 20; j++) {
       if (map[i][j] == 1){
        fill("black");
-       rect(i*35, j*35, 35, 35);
-      }
-      else if (map[i][j] == 2){
-        fill("brown");
-        rect(i*35, j*35, 35, 35);
+       rect(j*50, i*50, 50, 50);
+       map_of_squares[black_square_count] = new Rectangle (j * 50, i * 50, 50, 50);
+       black_square_count += 1;
       }
       else {
         fill("green");
-        rect(i*35, j*35, 35, 35);
+        rect(j*50, i*50, 50, 50);
       }
     }
   }
+  fill("brown");
+  rect(11*50, 0, 50, 50);
 }
 
 

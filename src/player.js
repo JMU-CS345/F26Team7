@@ -14,7 +14,15 @@ class Player {
   
     }
     
-    moveUp() {
+    moveUp(map_of_squares) {
+        for (let i = 0; i < map_of_squares.length; i++){
+            if (Math.abs(this.y - (map_of_squares[i].getY() + 50)) < 3 &&
+             this.x + 25 >= map_of_squares[i].getX()  &&
+             this.x + 25 <= map_of_squares[i].getX() + 50
+            ){
+                return;
+            }
+        }
         if (this.y <= 0){
             return;
         }
@@ -22,7 +30,16 @@ class Player {
         this.count -= 1;
         this.y -= this.speed;
     }
-    moveDown() {
+    moveDown(map_of_squares) {
+        for (let i = 0; i < map_of_squares.length; i++){
+            if (Math.abs((this.y + 50) - (map_of_squares[i].getY())) < 3 &&
+             this.x + 25 >= map_of_squares[i].getX()  &&
+             this.x + 25 <= map_of_squares[i].getX() + 50
+            ){
+                return;
+            }
+        }
+
         if (this.y > windowHeight - 100){
             return;
         }
@@ -30,7 +47,17 @@ class Player {
         this.count -= 1;
         this.y += this.speed;
     }
-    moveLeft() {
+    moveLeft(map_of_squares) {
+        for (let i = 0; i < map_of_squares.length; i++){
+            if (Math.abs((this.x) - (map_of_squares[i].getX() + 50)) < 3 &&
+             ((this.y + 50 >= map_of_squares[i].getY()  &&
+             this.y + 50  <= map_of_squares[i].getY() + 50) ||
+             (this.y + 25 >= map_of_squares[i].getY()  &&
+             this.y + 25 <= map_of_squares[i].getY() + 50))
+            ){
+                return;
+            }
+        }
         if (this.x <= 0){
             return;
         }
@@ -49,7 +76,17 @@ class Player {
         }
         this.x -= this.speed;
     }
-    moveRight() {
+    moveRight(map_of_squares) {
+        for (let i = 0; i < map_of_squares.length; i++){
+            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 3 &&
+             ((this.y + 50 >= map_of_squares[i].getY()  &&
+             this.y + 50  <= map_of_squares[i].getY() + 50) ||
+             (this.y + 25 >= map_of_squares[i].getY()  &&
+             this.y + 25 <= map_of_squares[i].getY() + 50))
+            ){
+                return;
+            }
+        }
         if (this.x >= windowWidth - 100){
             return;
         }
@@ -76,7 +113,14 @@ class Player {
     }
 
     draw() {
-    image(this.frames[this.current_image], this.x, this.y, 100,100);
+    image(this.frames[this.current_image], this.x, this.y, 50,50);
+    }
+    
+    getXPos(){
+        return this.x;
+    }
+    getYPos(){
+        return this.y;
     }
 
 }
