@@ -8,7 +8,7 @@
 
 **Date:**  11/02/2026
 
-**Scrum Master:**  Victor Zangla
+**Scrum Master:**  Nate Houseknecht
 
 **Attendees:**  Victor, Nate, Mamadou, Z
 
@@ -20,74 +20,86 @@
 
 *One or two sentences describing a playable outcome, not a list of tickets. e.g., "A player can create a character and enter the first dungeon."*
 
-Player can move around a randomly created map after pressing "play" on a starting screen.
+A player can choose their character class (i.e. ice, fire, earth), and begin to attack enemies with basic spells
 
 ---
 
 ## 3. Capacity and Velocity
 
-**Sprint dates:** 11/02/2026 to 11/09/2026
+**Sprint dates:** 11/11/2026 to 11/18/2026
 
-**Velocity last sprint (points completed):** N/A *(Sprint 1: write "n/a")*
+**Velocity last sprint (points completed):** 9
 
-**Average velocity so far:** N/A
+**Average velocity so far:** 9
 
 **Known absences or reduced availability this sprint:** NONE
 
 **Points committed this sprint:** 
--Grid Movement
--Starting Screen
--Dungeon Generation
+-Player Health and Permadeath keep loop 3
+-Enemy Defeated 3
+-Enemy Creation 3
+-Basic Spells 3
 
 **Why this commitment is realistic:** *(Compare it to your velocity and capacity. If you are committing more than last sprint's velocity, explain why.)*
 
-This is our first sprint, we do not have a frame of reference
-for knowing if this is realistic.
+Last sprint, we underestimated our abilities, and shot too low, so this time we are committing to slightly more in hopes that we fill out our time. 
 
 ---
 
 ## 4. Committed Backlog Items
--Grid Movement
--Starting Screen
--Dungeon Generation
+-Player Health and Permadeath Keep Loop
+-Enemy Defeated
+-Enemy Creation
+-Basic Spells
 
 *Every item listed here must meet the Definition of Ready in your constitution. Items should be taken from the top of the product backlog in priority order. If you skipped a higher-priority item, explain why under "Notes".*
 
 | Issue # | User story | Estimate | Owner | Ready? |
 |---------|------------|----------|-------|--------|
-|  #1     | As a player, I want to move my mage character in four directions across the dungeon grid, so that I can navigate rooms and avoid obstacles. |1 day|Nate| [ ]    |
-|  #19    | As a player, I want to open the game to a starting screen, so that I am greeted each time I open the game.| 1 day |Nate| [ ]    |
-|  #23    | As a player, I want to see variety within the different rooms I explore.          |1 week|Victor| [ ]    |
-|         |            |          |       | [ ]    |
+|  #3    | As a player, I want my run to end immediately when my health reaches zero, so that dungeon runs carry high stakes. |1 day| Z | [Y]    |
+|  #5    |As a player, I want enemies to die when I defeat them, so that they are not in the way and I know I have defeated them| 1 day | Victor | [Y]    |
+|  #60   | As a player, I want to have enemies that attack me so that the game feels difficult and has a purpose|3 days| Victor | [Y]    |
+|  #61   | As a player, I want to be able to cast spells, so that I can damage enemies and progress in the game |  3 days  | Mamadou      | [Y]    |
 |         |            |          |       | [ ]    |
 
 **Total points:** _
-3
+12
 **Notes:** _
-
+Nate will be doing art to facilitate all four of these points
 ---
 
 ## 5. Task Breakdown
 
 *Break each story into tasks. Include tasks for writing tests and reviewing PRs, not only coding.*
 
-### Issue #1: *Dungeon Generation*
+### Issue #1: *Permadeath and Dungeon Keep Loop*
 
-- [Dungeons should have one staircase down]
-- [Dungeon rooms should have ways in and out]
-- [Dungeon rooms should have solid walls and obstacles]
+- [Players should have a visible health bar]
+- [The player's health bar should decrease when they are hit by an enemy]
+- [When the health bar is empty, the player should die and have to restart from the last village]
+- [Draw death screen]
 
-### Issue #19: *(Starting Screen)*
+### Issue #19: *Enemy Defeated*
 
-- [Start screen should have a start and an options button]
-- [Clicking the start button should start the game]
-- [Clicking the options button should open another sub menu to be completed later]
+- [Enemies should have health bars that appear above them the first time they are hit]
+- [When the enemy's health bar reaches zero, it should die and disappear]
+- [When the enemy dies, they should drop some kind of loot]
+- [Draw enemy death animation]
 
-### Issue #23: *(Grid Movement)*
+### Issue #23: *Enemy Creation*
 
-- [Draw a Mage]
-- [Draw another Mage frame for animation's sake]
-- [Allow the Mage to move up, down, left, and right, within the confines of the screen]
+- [Enemies should attempt to follow the player]
+- [Enemies should attempt to attack the player]
+- [Enemies should be able to do damage to the player]
+- [Draw enemies]
+
+### Issue #61: *Basic Spells*
+- [Players should be able to choose a class]
+- [Players should be able to commit a melee attack]
+- [Players should be able to do a ranged attack]
+- [Players should be able to create a blockade]
+- [A player's blockade should inflict a status effect upon the enemy]
+- [Draw all spells and melee attacks]
 
 ---
 
@@ -95,15 +107,14 @@ for knowing if this is realistic.
 
 | Member | Stories owned | Points |
 |--------|---------------|--------|
-| Mamadou Cissoko|dungeon generation          |        |
-| Z wright      |dungeon generation         |        |
-| Victor       | function of movment           |        |
-| Nate      | Art for rooms and screen     |        |
+| Mamadou Cissoko|Basic Spells         |    3   |
+| Z wright      |Enemy Creation and Enemy Defeated      |   6    |
+| Victor       | Permadeath and Keep Loop         |    3   |
+| Nate      | Art for all four points    |   3    |
 
 *If the work is not balanced, explain why:*
 
-_The dungeon generation is much more complex
-than starting menu and movement.
+_The enemy creation and defeated animation is more complicated, but Victor is the strongest programmer among us so we believe he will be able to handle this.
 
 ---
 
@@ -121,7 +132,7 @@ _We did not split any stories for this current sprint.
 
 | Action item | How it shows up in this sprint |
 |-------------|--------------------------------|
-|      N/A    |              N/A               |
+|      Communication of all non explicit work    |  Any time someone works on something that was not specifically assigned to them, they will inform the group            |
 |             |                                |
 
 ---
@@ -130,9 +141,7 @@ _We did not split any stories for this current sprint.
 
 *What might stop the team from meeting the sprint goal? Which stories depend on others being finished first?*
 
-Poor planning and communication will be the biggest 
-obstacle for meeting this current sprint goal. As of right now, however, none of our current stories 
-are dependent on one another. We can have basic movement, for example, without needing dungeon generation or a main menu. This is why it may be tempting for the team to work with minimal communication. This is not good because we still need to have a cohesive structure of the overall game, where all the components live, etc.
+The only thing tha tmight stop our team from meeting the sprint goal is if something is more complicated than we orginally expected. We believe that we have all of the items and skills we needto complete all of these goals on time. As of now, only the player's health and the enemies' attacks are dependent on each other, with player health needing to be finished first.
 
 ---
 
