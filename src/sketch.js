@@ -15,13 +15,18 @@ const CONFIG = {
 
   assets: {
     menuBackground: "assets/menu_background.png", // 960x540
-    playButton:     "assets/play_button.png",     // optional
-    playButtonHover:"assets/play_button_hover.png", // optional
+    playButton:     "assets/start_button.svg",    // placeholder; replace with final button art later
+    playButtonHover:"assets/start_button.svg",    // placeholder hover art
     introVideo:     "assets/intro.mp4",
     deathScreen: "assets/deathScreen.png", // temporary test image; replace with the death screen image later
+    restartButton: "assets/restart_button.svg", // placeholder; replace with final button art later
     level1Background: "assets/level1_background.png", // optional
     playerFrame1: "assets/player_1.png", // optional; walking frame 1
     playerFrame2: "assets/player_2.png", // optional walking frame 2
+    playerPlaceholderUp: "assets/player_placeholder_up.svg",
+    playerPlaceholderDown: "assets/player_placeholder_down.svg",
+    playerPlaceholderLeft: "assets/player_placeholder_left.svg",
+    playerPlaceholderRight: "assets/player_placeholder_right.svg",
     font: null, // e.g. "assets/MyFont.ttf"
     wallTile:      "assets/wall.jpeg",
     dirtyWallTile: "assets/dirtyWall.jpeg",
@@ -32,6 +37,7 @@ const CONFIG = {
     titleY: 180,
     creditsY: 250,
     button: { x: 480, y: 565, w: 220, h: 70 },
+    restartButton: { w: 220, h: 60, bottom: 120 },
   },
 
   player: {
@@ -42,6 +48,16 @@ const CONFIG = {
     frameTime: 0.25,   // seconds each animation frame is shown while walking
     startX: 456,       // top-left start position
     startY: 246,
+  },
+
+  enemy: {
+    size: 42,
+    speed: 90,
+    maxHealth: 60,
+    meleeRange: 8,
+    meleeDamage: 20,
+    attackCooldown: 0.8,
+    startOffset: 24,
   },
 
   room: {
@@ -62,6 +78,10 @@ const CONFIG = {
     playerFrame1: [120, 190, 255], // box color on animation frame 1
     playerFrame2: [255, 200, 90],  // box color on animation frame 2
     playerNose: [30, 30, 60],
+    enemy: [240, 110, 30],
+    healthBarBackground: [45, 20, 20],
+    playerHealthBar: [70, 220, 100],
+    enemyHealthBar: [230, 60, 45],
     roomFloor: [60, 50, 90],
     door: [140, 90, 50],
   },
@@ -74,6 +94,7 @@ const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1", DEATH: "death" }
 let state = STATE.MENU;
 let level1Initialized = false;
 let player;
+let enemies = [];
 let imgs = {};          // loaded images (null if missing)
 let gameFont = null;
 let introVideo;
@@ -122,7 +143,7 @@ function generateDungeon() {
 }
 
 function preload() {
-  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "deathScreen", "level1Background", "playerFrame1", "playerFrame2", "wallTile", "dirtyWallTile"]) {
+  for (const key of ["menuBackground", "titleLogo", "playButton", "playButtonHover", "deathScreen", "restartButton", "level1Background", "playerFrame1", "playerFrame2", "playerPlaceholderUp", "playerPlaceholderDown", "playerPlaceholderLeft", "playerPlaceholderRight", "wallTile", "dirtyWallTile"]) {
     loadOptionalImage(key, CONFIG.assets[key]);
   }
   if (CONFIG.assets.font) {
@@ -244,6 +265,7 @@ function startLevel1() {
   if (state === STATE.LEVEL1) return;
   state = STATE.LEVEL1; // switch state first so we never get stuck
   createPlayer();
+  createEnemies();
   console.log("Starting level 1");
   try {
     introVideo.elt.pause();
@@ -272,6 +294,7 @@ function drawLevel1() {
   // --- UPDATE: the player is frozen while the screen is fading ---
   if (!transition.active) {
     updatePlayer(dt);
+    updateEnemies(dt);
     if (player.isDead()) {
       startDeathScreen();
       return;
@@ -287,6 +310,7 @@ function drawLevel1() {
   drawRoom();
 
   // --- PLAYER: always drawn after the world so it sits on top ---
+  drawEnemies();
   drawPlayer();
 
   // Status label (delete when real level 1 work begins)
@@ -309,15 +333,63 @@ function startDeathScreen() {
 function drawDeathScreen() {
   if (imgs.deathScreen) {
     image(imgs.deathScreen, 0, 0, width, height);
-    return;
+  } else {
+    background(...CONFIG.colors.background);
   }
 
-  background(...CONFIG.colors.background);
+  drawRestartButton();
+}
+
+function restartButtonBounds() {
+  const b = CONFIG.layout.restartButton;
+  return {
+    x: width / 2,
+    y: height - b.bottom - b.h / 2,
+    w: b.w,
+    h: b.h,
+  };
+}
+
+function restartButtonHovered() {
+  const b = restartButtonBounds();
+  return mouseX > b.x - b.w / 2 && mouseX < b.x + b.w / 2 &&
+    mouseY > b.y - b.h / 2 && mouseY < b.y + b.h / 2;
+}
+
+function drawRestartButton() {
+  const b = restartButtonBounds();
+  const hovered = restartButtonHovered();
+  cursor(hovered ? HAND : ARROW);
+
+  if (imgs.restartButton) {
+    imageMode(CENTER);
+    image(imgs.restartButton, b.x, b.y, b.w, b.h);
+    imageMode(CORNER);
+  } else {
+    rectMode(CENTER);
+    noStroke();
+    fill(...(hovered ? CONFIG.colors.buttonHover : CONFIG.colors.button));
+    rect(b.x, b.y, b.w, b.h, 12);
+    fill(...CONFIG.colors.buttonText);
+    textAlign(CENTER, CENTER);
+    textSize(28);
+    text("Restart", b.x, b.y);
+    rectMode(CORNER);
+  }
+}
+
+function restartGame() {
+  floorNumber = 1;
+  transition = createTransition();
+  state = STATE.LEVEL1;
+  createPlayer();
+  createEnemies();
 }
 
 function goToNextFloor() {
   floorNumber++;
   createPlayer(); // puts the player back in the middle of the room
+  createEnemies();
   // later: generate a new room layout here
 }
 
@@ -427,6 +499,52 @@ function createPlayer() {
   };
 }
 
+function createEnemies() {
+  const E = CONFIG.enemy;
+  const r = getRoom();
+  const padding = Math.max(0, E.startOffset);
+  let x;
+  let y;
+  let attempts = 0;
+
+  do {
+    x = random(r.innerX + padding, r.innerX + r.innerW - E.size - padding);
+    y = random(r.innerY + padding, r.innerY + r.innerH - E.size - padding);
+    attempts++;
+  } while (player && Math.hypot(
+    x + E.size / 2 - (player.x + player.w / 2),
+    y + E.size / 2 - (player.y + player.h / 2)
+  ) < player.w * 2 && attempts < 20);
+
+  enemies = [{
+    x: x,
+    y: y,
+    w: E.size,
+    h: E.size,
+    maxHealth: Math.max(1, E.maxHealth),
+    health: Math.max(1, E.maxHealth),
+    attackTimer: 0,
+
+    takeDamage(amount) {
+      if (!Number.isFinite(amount) || amount < 0) {
+        console.error("Enemy damage must be a non-negative number:", amount);
+        return 0;
+      }
+      const previousHealth = this.health;
+      this.health = Math.max(0, this.health - amount);
+      return previousHealth - this.health;
+    },
+
+    getHealthRatio() {
+      return this.health / this.maxHealth;
+    },
+
+    isDead() {
+      return this.health <= 0;
+    },
+  }];
+}
+
 function isBlocked(x, y, w, h) {
   const r = getRoom();
 
@@ -501,18 +619,86 @@ function updatePlayer(dt) {
   }
 }
 
+function updateEnemies(dt) {
+  if (!player) return;
+
+  const E = CONFIG.enemy;
+  for (const enemy of enemies) {
+    if (enemy.isDead()) continue;
+    enemy.attackTimer = Math.max(0, enemy.attackTimer - dt);
+
+    const enemyCenterX = enemy.x + enemy.w / 2;
+    const enemyCenterY = enemy.y + enemy.h / 2;
+    const playerCenterX = player.x + player.w / 2;
+    const playerCenterY = player.y + player.h / 2;
+    const distanceX = playerCenterX - enemyCenterX;
+    const distanceY = playerCenterY - enemyCenterY;
+    const distance = Math.hypot(distanceX, distanceY);
+
+    if (distance > E.meleeRange && distance > 0) {
+      const step = Math.min(E.speed * dt, distance - E.meleeRange);
+      const moveX = distanceX / distance * step;
+      const moveY = distanceY / distance * step;
+      if (!isBlocked(enemy.x + moveX, enemy.y, enemy.w, enemy.h)) enemy.x += moveX;
+      if (!isBlocked(enemy.x, enemy.y + moveY, enemy.w, enemy.h)) enemy.y += moveY;
+    }
+
+    const touchingPlayer = enemy.x < player.x + player.w &&
+      enemy.x + enemy.w > player.x &&
+      enemy.y < player.y + player.h &&
+      enemy.y + enemy.h > player.y;
+    if (touchingPlayer && enemy.attackTimer <= 0) {
+      player.takeDamage(E.meleeDamage);
+      enemy.attackTimer = E.attackCooldown;
+    }
+  }
+}
+
+function drawHealthBar(entity, color) {
+  const barWidth = entity.w;
+  const barHeight = 6;
+  const ratio = constrain(entity.getHealthRatio(), 0, 1);
+  const x = entity.x;
+  const y = entity.y - barHeight - 6;
+
+  noStroke();
+  fill(...CONFIG.colors.healthBarBackground);
+  rect(x, y, barWidth, barHeight);
+  fill(...color);
+  rect(x, y, barWidth * ratio, barHeight);
+}
+
+function drawEnemies() {
+  for (const enemy of enemies) {
+    if (enemy.isDead()) continue;
+    noStroke();
+    fill(...CONFIG.colors.enemy);
+    rect(enemy.x, enemy.y, enemy.w, enemy.h);
+    drawHealthBar(enemy, CONFIG.colors.enemyHealthBar);
+  }
+}
+
 function drawPlayer() {
   // ANIMATOR: this is where your art shows up. If assets/player_1.png and
   // assets/player_2.png exist, they are drawn here automatically, one per
   // animation frame, and the box below is skipped. Draw the wizard facing
   // RIGHT; the push/translate/scale lines mirror it when he walks left.
-  const sprite = player.animFrame === 0 ? imgs.playerFrame1 : imgs.playerFrame2;
+  const directionalPlaceholder = player.look === "up"
+    ? imgs.playerPlaceholderUp
+    : player.look === "down"
+      ? imgs.playerPlaceholderDown
+      : player.facing < 0
+        ? imgs.playerPlaceholderLeft
+        : imgs.playerPlaceholderRight;
+  const frameSprite = player.animFrame === 0 ? imgs.playerFrame1 : imgs.playerFrame2;
+  const sprite = frameSprite || directionalPlaceholder;
+  const usingDirectionalPlaceholder = !frameSprite && Boolean(directionalPlaceholder);
 
   push();
   // Move the origin to the wizard's horizontal center, then mirror
   // horizontally when facing left (scale of -1 flips the x axis).
   translate(player.x + player.w / 2, player.y);
-  scale(player.facing, 1);
+  scale(usingDirectionalPlaceholder ? 1 : player.facing, 1);
   const damageFlashActive = player.damageFlashTimer > 0;
   if (damageFlashActive) tint(255, 0, 0);
 
@@ -539,6 +725,7 @@ function drawPlayer() {
   }
   if (damageFlashActive) noTint();
   pop();
+  drawHealthBar(player, CONFIG.colors.playerHealthBar);
 }
 
 
@@ -548,10 +735,12 @@ function drawPlayer() {
 function mousePressed() {
   if (state === STATE.MENU && playButtonHovered()) startVideo();
   else if (state === STATE.VIDEO) startLevel1();
+  else if (state === STATE.DEATH && restartButtonHovered()) restartGame();
 }
 
 function keyPressed() {
   if (state === STATE.VIDEO) startLevel1();
+  if (state === STATE.DEATH && (keyCode === ENTER || key === "r" || key === "R")) restartGame();
   if (state === STATE.LEVEL1 && player) {
     if (keyCode === LEFT_ARROW || keyCode === RIGHT_ARROW) player.lastAxis = "x";
     if (keyCode === UP_ARROW || keyCode === DOWN_ARROW) player.lastAxis = "y";
