@@ -1,6 +1,19 @@
 var scene_num; // Start menu, level 1, etc. Start is 0.
+let videoFailed = false;
 function setup() {
-  start_pic = loadImage ('assets/menu_background.png');
+  scene_num = 0; // game has not begun yet.
+  start_pic = loadImage ('assets/menu_background.png'); //menu image
+  /*
+    INTRO VIDEO
+  */
+ introVideo = createVideo("assets/intro.mp4");
+ introVideo.hide(); // we draw it on the canvas ourselves
+ introVideo.elt.addEventListener("error", () => { videoFailed = true; });
+ introVideo.elt.addEventListener("ended", startLevel1);
+  
+  /*
+    PLAYER VARIABLES
+  */
   // player character moving left sprites
   mage_walking_left_0 = loadImage ('assets/mage_left.png');
   mage_walking_left_1 = loadImage ('assets/mage_step_1.png');
@@ -18,11 +31,15 @@ function setup() {
     mage_walking_right_0, mage_walking_right_1, mage_walking_right_2,
     mage_down, mage_up,
     windowWidth/2, windowHeight/2);
-  scene_num = 0; // game has not begun yet.
   createCanvas (windowWidth, windowHeight);
   not_generated = true;
-  map = [];
-  map_of_squares = [];
+  /*
+  DUNGEON VARIABLES
+  */
+  wall = loadImage ('assets/wall.png');
+  wall_dirty = loadImage ('assets/wall_dirty.PNG');
+  floor = loadImage ('assets/floor.PNG');
+  dungeon = new DungeonRoom(floor, wall, wall_dirty);
 }
 
 function draw() {
@@ -31,6 +48,9 @@ function draw() {
     loadMainMenu();
     break;
     case 1:
+    drawVideo();
+    break;
+    case 2:
     level1();
     break;
   }
@@ -50,6 +70,7 @@ function loadMainMenu(){
     if (mouseIsPressed == true) {
       fill(218, 177, 218);
       scene_num = 1;
+      startVideo();
     }
   } else {
     fill("purple");
@@ -62,18 +83,43 @@ function loadMainMenu(){
   text ("Play", (windowWidth/2.3) + 50, windowHeight/1.3 + 40);
 }
 
+function startVideo() {
+  if (videoFailed) { scene_num += 1; return; } // no video file yet? skip ahead
+  cursor(ARROW);
+  introVideo.volume(1);
+  introVideo.play();
+}
+
+function drawVideo() {
+  clear();
+  background(0);
+  image(introVideo, 0, 0, width, height);
+
+  noStroke(); // to get rid of outlines for ALL shapes
+}
+
+function startLevel1() {
+  if (scene_num === 2) return;
+  scene_num = 2; // switch state first so we never get stuck
+  try {
+    introVideo.elt.pause();
+  } catch (e) {
+    console.error("Could not pause video:", e);
+  }
+}
+
 function movePlayer(){
   if(keyIsDown(UP_ARROW)){
-      player.moveUp(map_of_squares);
+      player.moveUp(dungeon.getFilledSquares());
   }
   else if (keyIsDown(DOWN_ARROW)) {
-    player.moveDown(map_of_squares);
+    player.moveDown(dungeon.getFilledSquares());
   }
   else if(keyIsDown(RIGHT_ARROW)){
-      player.moveRight(map_of_squares);
+      player.moveRight(dungeon.getFilledSquares());
   }
   else if (keyIsDown(LEFT_ARROW)) {
-    player.moveLeft(map_of_squares);
+    player.moveLeft(dungeon.getFilledSquares());
     
   }
   player.update();
@@ -85,159 +131,14 @@ function level1() {
   clear();
   background(0);
   if (not_generated){
-    generateDungeon();
+    dungeon.generateDungeon();
     not_generated = false;
   }
-  drawDungeon();
+  dungeon.drawDungeon();
   movePlayer();
 }
 
-class Rectangle {
-  constructor(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-  }
-  getX(){
-    return this.x;
-  }
-  getY(){
-    return this.y;
-  }
-}
 
-function generateDungeon() {
-  alive_probability = 0.15;
-  // initial generation
-  for (let i = 0; i < 12; i++){
-    map[i] = [];
-    for (let j = 0; j < 20; j++) {
-      if (Math.random() < alive_probability
-      || i == 0 || j == 0 || i == 11 || j == 19){
-        map[i][j] = 1;
-      }
-      else{
-        map[i][j] = 0;
-      }
-    }
-  }
-  //create door
-  map[0][11] = 2;
-  //run birth/survival sim
-  let iterations = 90;
-  let birth_threshold = 1;
-  let survival_threshold = 2;
-  let current_survival_points = 0;
-  let current_birth_points = 0;
-  while (iterations != 0)
-  {
-    for (let i = 1; i < 11; i++){
-      for (let j = 1; j < 19; j++) {
-        if (map[i][j - 1] == 1) {
-          current_survival_points += 1;
-          current_birth_points += 1;
-        }
-        else if (map[i][j + 1] == 1) {
-          current_survival_points += 1;
-          current_birth_points += 1;
-        }
-        else if (map[i - 1][j] == 1) {
-          current_survival_points += 1;
-          current_birth_points += 1;
-        }
-        else if (map[i + 1][j] == 1) {
-          current_survival_points += 1;
-          current_birth_points += 1;
-        }
-        else if (map[i + 1][j + 1] == 1) {
-          current_survival_points += 1;
-          current_birth_points += 1;
-        }
-        else if (map[i + 1][j - 1] == 1) {
-          current_survival_points += 1;
-          current_birth_points += 1;
-        }
-        else if (map[i - 1][j + 1] == 1) {
-          current_survival_points += 1;
-          current_birth_points += 1;
-        }
-        else if (map[i - 1][j - 1] == 1) {
-          current_survival_points += 1;
-          current_birth_points += 1;
-        }
-        else if (map[i][j] == 0 && current_birth_points >= birth_threshold){
-          map[i][j] == 1;
-        }
-        else if (map[i][j] == 1 && current_survival_points < survival_threshold){
-          map[i][j] == 0;
-        }
-        // check if near door
-        if (map[i][j - 1] == 2) {
-          current_survival_points = -8;
-          current_birth_points = -8;
-        }
-        else if (map[i][j + 1] == 2) {
-          current_survival_points = -8;
-          current_birth_points = -8;
-        }
-        else if (map[i - 1][j] == 2) {
-          current_survival_points = -8;
-          current_birth_points = -8;
-        }
-        else if (map[i + 1][j] == 2) {
-          current_survival_points = -8;
-          current_birth_points = -8;
-        }
-        else if (map[i + 1][j + 1] == 2) {
-          current_survival_points = -8;
-          current_birth_points = -8;
-        }
-        else if (map[i + 1][j - 1] == 2) {
-          current_survival_points = -8;
-          current_birth_points = -8;
-        }
-        else if (map[i - 1][j + 1] == 2) {
-          current_survival_points = -8;
-          current_birth_points = -8;
-        }
-        else if (map[i - 1][j - 1] == 2) {
-          current_survival_points = -8;
-          current_birth_points += -8;
-        }
-        if (map[i][j] == 0 && current_birth_points >= birth_threshold){
-          map[i][j] == 1;
-        }
-        if (map[i][j] == 1 && current_survival_points < survival_threshold){
-          map[i][j] == 0;
-        }
-        current_survival_points = 0;
-        current_birth_points = 0;
-      }
-    }
-   iterations -= 1;
-  }
-}
-
-function drawDungeon(){
-  let black_square_count = 0;
-  for (let i = 0; i < 12; i++){
-    for (let j = 0; j < 20; j++) {
-      if (map[i][j] == 1){
-       fill("black");
-       rect(j*50, i*50, 50, 50);
-       map_of_squares[black_square_count] = new Rectangle (j * 50, i * 50, 50, 50);
-       black_square_count += 1;
-      }
-      else {
-        fill("green");
-        rect(j*50, i*50, 50, 50);
-      }
-    }
-  }
-  fill("brown");
-  rect(11*50, 0, 50, 50);
-}
 
 
 

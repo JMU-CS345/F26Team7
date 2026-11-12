@@ -78,7 +78,7 @@ class Player {
     }
     moveRight(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 3 &&
+            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 4 &&
              ((this.y + 50 >= map_of_squares[i].getY()  &&
              this.y + 50  <= map_of_squares[i].getY() + 50) ||
              (this.y + 25 >= map_of_squares[i].getY()  &&
