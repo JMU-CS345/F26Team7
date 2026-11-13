@@ -30,7 +30,7 @@ function setup() {
   player = new Player(mage_walking_left_0, mage_walking_left_1, mage_walking_left_2,
     mage_walking_right_0, mage_walking_right_1, mage_walking_right_2,
     mage_down, mage_up,
-    windowWidth/2, windowHeight/2);
+    500, 300);
   createCanvas (windowWidth, windowHeight);
   not_generated = true;
   /*
@@ -40,6 +40,7 @@ function setup() {
   wall_dirty = loadImage ('assets/wall_dirty.PNG');
   floor = loadImage ('assets/floor.PNG');
   dungeon = new DungeonRoom(floor, wall, wall_dirty);
+  
 }
 
 function draw() {
@@ -122,18 +123,34 @@ function movePlayer(){
     player.moveLeft(dungeon.getFilledSquares());
     
   }
-  player.update();
+    player.update();
+  const cx = player.getXPos() + 25;
+  const cy = player.getYPos() + 25;
+  if (dungeon.isAtExit(cx, cy)){
+    dungeon.enterNextRoom();
+    player.setPosition(dungeon.getEntranceCol() * 50, 500); // just above the entrance door
+  }
+  else if (dungeon.isAtEntrance(cx, cy)){
+    dungeon.goBack();
+    player.setPosition(dungeon.getExitCol() * 50, 50); // just below that room's exit door
+  }
   player.draw();
 }
 
 function level1() {
-  
   clear();
   background(0);
   if (not_generated){
     dungeon.generateDungeon();
     not_generated = false;
   }
+  push();
+  translate(Math.floor((width - 1000) / 2), Math.floor((height - 600) / 2));
   dungeon.drawDungeon();
   movePlayer();
+  pop();
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
