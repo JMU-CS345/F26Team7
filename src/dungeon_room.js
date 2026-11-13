@@ -5,12 +5,16 @@ class DungeonRoom {
         this.floor = floor;
         this.wall = wall;
         this.wall_dirty = wall_dirty;
-        
+        this.exit_col = -1;
+        this.entrance_col = null;
+        this.history = [];
     }
 
 
 
-generateDungeon() {
+generateDungeon(entrance_col = null) {
+  this.map = [];
+  this.entrance_col = entrance_col;
   let alive_probability = 0.15;
   let dirty_probability = 0.6;
   // initial generation
@@ -32,8 +36,17 @@ generateDungeon() {
       }
     }
   }
-  //create door the value 3 isn't important yet
-  this.map[0][11] = 3;
+  // pick a new exit column on the top wall (never a corner, never the same as last time)
+  let new_exit = this.exit_col;
+  while (new_exit == this.exit_col){
+    new_exit = 1 + Math.floor(Math.random() * 18);
+  }
+  this.exit_col = new_exit;
+  this.map[0][this.exit_col] = 3;
+  // entrance door on the bottom wall, if we came from another room
+  if (this.entrance_col !== null){
+    this.map[11][this.entrance_col] = 4;
+  }
   //run birth/survival sim
   let iterations = 90;
   let birth_threshold = 1;
@@ -127,9 +140,16 @@ generateDungeon() {
     }
    iterations -= 1;
   }
+
+  this.map[1][this.exit_col] = 0;
+  if (this.entrance_col !== null){
+    this.map[10][this.entrance_col] = 0;
+  }
+  this.map[6][10] = 0;
 }
 
 drawDungeon(){
+  this.all_filled_squares = [];
   let black_square_count = 0;
   for (let i = 0; i < 12; i++){
     for (let j = 0; j < 20; j++) {
@@ -150,11 +170,43 @@ drawDungeon(){
     }
   }
   fill("brown");
-  rect(11*50, 0, 50, 50);
+  rect(this.exit_col * 50, 0, 50, 50);
+  if (this.entrance_col !== null){
+    fill("darkblue");
+    rect(this.entrance_col * 50, 11 * 50, 50, 50);
+  }
 }
 
 getFilledSquares(){
     return this.all_filled_squares;
 }
+getExitCol(){
+  return this.exit_col;
+}
 
+getEntranceCol(){
+  return this.entrance_col;
+}
+
+isAtExit(x, y){
+  return x >= this.exit_col * 50 && x < (this.exit_col + 1) * 50 && y < 50;
+}
+
+isAtEntrance(x, y){
+  return this.entrance_col !== null &&
+    x >= this.entrance_col * 50 && x < (this.entrance_col + 1) * 50 && y >= 550;
+}
+
+enterNextRoom(){
+  // save this room, then build a new one whose entrance lines up with the door we just used
+  this.history.push({map: this.map, exit_col: this.exit_col, entrance_col: this.entrance_col});
+  this.generateDungeon(this.exit_col);
+}
+
+goBack(){
+  const previous = this.history.pop();
+  this.map = previous.map;
+  this.exit_col = previous.exit_col;
+  this.entrance_col = previous.entrance_col;
+}
 }

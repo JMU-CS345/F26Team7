@@ -42,7 +42,7 @@ class Player {
             }
         }
 
-        if (this.y > windowHeight - 100){
+        if (this.y >= 600 - 50){
             return;
         }
         this.current_image = 6;
@@ -89,7 +89,7 @@ class Player {
                 return;
             }
         }
-        if (this.x >= windowWidth - 100){
+        if (this.x >= 1000 - 50){
             return;
         }
         this.count -= 1;
@@ -165,6 +165,10 @@ class Player {
     
     getXPos(){
         return this.x;
+    }
+    setPosition(x, y){
+        this.x = x;
+        this.y = y;
     }
     getYPos(){
         return this.y;
