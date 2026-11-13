@@ -11,6 +11,8 @@ class Player {
         this.y = y;
         this.count = 7;
         this.movement = createVector(0,0);
+        this.maxHealth = 100;
+        this.health = this.maxHealth;
   
     }
     
@@ -112,8 +114,53 @@ class Player {
         }
     }
 
+    takeDamage(amount) {
+        if (!Number.isFinite(amount) || amount < 0) {
+            console.error("Player damage must be a non-negative number:", amount);
+            return 0;
+        }
+        const previousHealth = this.health;
+        this.health = Math.max(0, this.health - amount);
+        return previousHealth - this.health;
+    }
+
+    heal(amount) {
+        if (!Number.isFinite(amount) || amount < 0) {
+            console.error("Player healing must be a non-negative number:", amount);
+            return 0;
+        }
+        const previousHealth = this.health;
+        this.health = Math.min(this.maxHealth, this.health + amount);
+        return this.health - previousHealth;
+    }
+
+    isDead() {
+        return this.health <= 0;
+    }
+
+    resetHealth() {
+        this.health = this.maxHealth;
+    }
+
+    getHealthRatio() {
+        return this.health / this.maxHealth;
+    }
+
     draw() {
     image(this.frames[this.current_image], this.x, this.y, 50,50);
+
+    // Keep the health bar inside the player square, just below its top edge.
+    const barX = this.x + 5;
+    const barY = this.y + 5;
+    const barWidth = 40;
+    const barHeight = 5;
+    const healthRatio = constrain(this.getHealthRatio(), 0, 1);
+
+    noStroke();
+    fill(45, 20, 20);
+    rect(barX, barY, barWidth, barHeight);
+    fill(70, 220, 100);
+    rect(barX, barY, barWidth * healthRatio, barHeight);
     }
     
     getXPos(){
