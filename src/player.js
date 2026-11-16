@@ -163,6 +163,13 @@ class Player {
     rect(barX, barY, barWidth * healthRatio, barHeight);
     }
     
+    // returns [dx, dy] for the direction the mage is currently facing
+    getFacing(){
+        if (this.current_image <= 2) return [-1, 0];
+        if (this.current_image <= 5) return [1, 0];
+        if (this.current_image == 6) return [0, 1];
+        return [0, -1];
+    }
     getXPos(){
         return this.x;
     }

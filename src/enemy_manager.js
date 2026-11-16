@@ -74,6 +74,11 @@ class EnemyManager {
     }
   }
 
+  // Remove enemies killed by spells.
+  removeDead() {
+    this.enemies = this.enemies.filter(e => !e.isDead());
+  }
+
   draw() {
     for (const enemy of this.enemies) {
       enemy.draw();
