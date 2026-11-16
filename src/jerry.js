@@ -14,8 +14,8 @@ class Jerry extends Enemy {
   // Call ONCE inside setup() so the images are loaded before the game starts.
   static loadAssets() {
     Jerry.frames = [
-      loadImage('assets/Jerry1.png'),
-      loadImage('assets/Jerry2.png')
+      loadImage('assets/enemies/Jerry_frame1.png'),
+      loadImage('assets/enemies/Jerry_frame2.png')
     ];
   }
 

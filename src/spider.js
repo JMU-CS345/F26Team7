@@ -12,10 +12,10 @@ class Spider extends Enemy {
   // Call ONCE inside setup().
   static loadAssets() {
     Spider.frames = [
-      loadImage('assets/SpiderFrame1.png'),
-      loadImage('assets/SpiderFrame2.png')
+      loadImage('assets/enemies/Spider_frame1.png'),
+      loadImage('assets/enemies/Spider_frame2.png')
     ];
-    Spider.attackFrame = loadImage('assets/SpiderAttackFrame.png');
+    Spider.attackFrame = loadImage('assets/enemies/Spider_attack_frame.png');
   }
 
   constructor(x, y) {
