@@ -6,7 +6,7 @@ let mainMenuButton;
 const DEATH_BUTTON_WIDTH = 220;
 const DEATH_BUTTON_HEIGHT = 60;
 const CHARACTER_SELECT_SCENE = 4;
-let selectedCharacter = 0;
+var selectedCharacter = 0;
 let enemyManager;
 let spellManager;
 const FIREBALL_KEY = "2";

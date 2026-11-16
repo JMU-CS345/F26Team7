@@ -20,12 +20,17 @@
   <script src="https://cdn.jsdelivr.net/npm/jasmine-core@5.1.2/lib/jasmine-core/boot0.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jasmine-core@5.1.2/lib/jasmine-core/boot1.js"></script>
 
-  <!-- Code under test: the same order as index.html, but WITHOUT p5.js and sketch.js -->
-  <!-- e.g. <script src="src/model/player.js"></script> -->
+  <!-- Code under test: the same order as index.html, with the transition model. -->
+  <script src="p5.js"></script>
+  <script src="src/model/transition.js"></script>
+  <script src="src/player.js"></script>
+  <script src="src/sketch.js"></script>
 
   <!-- Specs: change "test/" if your team's test folder has a different name -->
   <script src="test/startMenu.spec.js"></script>
   <script src="test/example.spec.js"></script>
+  <script src="test/transition.spec.js"></script>
+  <script src="test/playerDeath.spec.js"></script>
 </head>
 <body></body>
 </html>
