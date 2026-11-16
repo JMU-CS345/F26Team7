@@ -18,7 +18,7 @@ class Player {
     
     moveUp(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs(this.y - (map_of_squares[i].getY() + 50)) < 3 &&
+            if (Math.abs(this.y - (map_of_squares[i].getY() + 50)) < 5 &&
              this.x + 25 >= map_of_squares[i].getX()  &&
              this.x + 25 <= map_of_squares[i].getX() + 50
             ){
@@ -34,7 +34,7 @@ class Player {
     }
     moveDown(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.y + 50) - (map_of_squares[i].getY())) < 3 &&
+            if (Math.abs((this.y + 50) - (map_of_squares[i].getY())) < 5 &&
              this.x + 25 >= map_of_squares[i].getX()  &&
              this.x + 25 <= map_of_squares[i].getX() + 50
             ){
@@ -51,7 +51,7 @@ class Player {
     }
     moveLeft(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.x) - (map_of_squares[i].getX() + 50)) < 3 &&
+            if (Math.abs((this.x) - (map_of_squares[i].getX() + 50)) < 5 &&
              ((this.y + 50 >= map_of_squares[i].getY()  &&
              this.y + 50  <= map_of_squares[i].getY() + 50) ||
              (this.y + 25 >= map_of_squares[i].getY()  &&
@@ -80,7 +80,7 @@ class Player {
     }
     moveRight(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 4 &&
+            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 5 &&
              ((this.y + 50 >= map_of_squares[i].getY()  &&
              this.y + 50  <= map_of_squares[i].getY() + 50) ||
              (this.y + 25 >= map_of_squares[i].getY()  &&

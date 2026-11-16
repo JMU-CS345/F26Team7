@@ -203,7 +203,7 @@ function drawVideo() {
   clear();
   background(0);
   image(introVideo, 0, 0, width, height);
-
+  
   noStroke(); // to get rid of outlines for ALL shapes
 }
 

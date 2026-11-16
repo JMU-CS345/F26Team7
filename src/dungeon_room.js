@@ -5,7 +5,6 @@ class DungeonRoom {
         this.floor = floor;
         this.wall = wall;
         this.wall_dirty = wall_dirty;
-        
     }
 
 
@@ -13,6 +12,7 @@ class DungeonRoom {
 generateDungeon() {
   let alive_probability = 0.15;
   let dirty_probability = 0.6;
+  let jerry_probability = 0.01;
   // initial generation
   for (let i = 0; i < 12; i++){
     this.map[i] = [];
@@ -27,7 +27,10 @@ generateDungeon() {
         }
         
       }
-      else{  
+      else if (Math.random() < jerry_probability){  
+        this.map[i][j] = 4; 
+      }
+      else{
         this.map[i][j] = 0;
       }
     }
@@ -143,8 +146,11 @@ drawDungeon(){
         black_square_count += 1;
         image(this.wall_dirty, j*50, i*50, 50,50);
       }
+      else if (this.map[i][j] == 4){
+        fill("yellow"); // placeholder, fix soon
+        rect(j*50, i*50, 50,50);
+      }
       else {
-        fill("green");
         image(this.floor, j*50, i*50, 50,50);
       }
     }
