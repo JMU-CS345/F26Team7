@@ -7,7 +7,7 @@ const DEATH_BUTTON_WIDTH = 220;
 const DEATH_BUTTON_HEIGHT = 60;
 const CHARACTER_SELECT_SCENE = 4;
 let selectedCharacter = 0;
-
+let enemyManager;
 function setup() {
   scene_num = 0; // game has not begun yet.
   start_pic = loadImage ('assets/menu_background.png'); //menu image
@@ -51,6 +51,12 @@ function setup() {
   wall_dirty = loadImage ('assets/wall_dirty.PNG');
   floor = loadImage ('assets/floor.PNG');
   dungeon = new DungeonRoom(floor, wall, wall_dirty);
+  /*
+   ENEMIES
+  */
+  Jerry.loadAssets();  // add one line like this per new enemy type
+  Spider.loadAssets();
+  enemyManager = new EnemyManager();
   
 }
 
@@ -243,10 +249,12 @@ function movePlayer(){
   if (dungeon.isAtExit(cx, cy)){
     dungeon.enterNextRoom();
     player.setPosition(dungeon.getEntranceCol() * 50, 500); // just above the entrance door
+    enemyManager.spawnForRoom(dungeon, player);
   }
   else if (dungeon.isAtEntrance(cx, cy)){
     dungeon.goBack();
     player.setPosition(dungeon.getExitCol() * 50, 50); // just below that room's exit door
+    enemyManager.spawnForRoom(dungeon, player);
   }
   player.draw();
 }
@@ -257,6 +265,7 @@ function level1() {
   if (not_generated){
     dungeon.generateDungeon();
     not_generated = false;
+    enemyManager.spawnForRoom(dungeon, player);
   }
   push();
   translate(Math.floor((width - 1000) / 2), Math.floor((height - 600) / 2));
@@ -266,6 +275,8 @@ function level1() {
     return;
   }
   movePlayer();
+  enemyManager.update(dungeon.getFilledSquares(), player);
+  enemyManager.draw();
   pop();
 }
 
