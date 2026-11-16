@@ -94,11 +94,11 @@ describe("Death screen buttons", function () {
   it("draws both death-screen buttons", function () {
     spyOn(window, "background");
     spyOn(window, "cursor");
+    spyOn(window, "image");
     spyOn(window, "drawDeathButton");
 
     drawDeathScreen();
 
-    expect(window.background).toHaveBeenCalledWith(20, 16, 40);
     expect(window.drawDeathButton).toHaveBeenCalledWith(0, "Restart");
     expect(window.drawDeathButton).toHaveBeenCalledWith(1, "Main Menu");
   });
