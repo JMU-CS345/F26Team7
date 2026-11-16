@@ -8,6 +8,9 @@ const DEATH_BUTTON_HEIGHT = 60;
 const CHARACTER_SELECT_SCENE = 4;
 let selectedCharacter = 0;
 let enemyManager;
+let spellManager;
+const FIREBALL_KEY = "2";
+const FIREWALL_KEY = "3";
 function setup() {
   scene_num = 0; // game has not begun yet.
   start_pic = loadImage ('assets/menu_background.png'); //menu image
@@ -57,6 +60,9 @@ function setup() {
   Jerry.loadAssets();  // add one line like this per new enemy type
   Spider.loadAssets();
   enemyManager = new EnemyManager();
+  Fireball.loadAssets();
+  FireWall.loadAssets();
+  spellManager = new SpellManager();
   
 }
 
@@ -190,9 +196,9 @@ function drawCharacterSelect() {
   textSize(42);
   text("Choose Your Character", width / 2, 55);
 
-  drawCharacterCard(0, "Mage");
-  drawCharacterCard(1, "Knight");
-  drawCharacterCard(2, "Rogue");
+  drawCharacterCard(0, "Fire");
+  drawCharacterCard(1, "Ice");
+  drawCharacterCard(2, "Earth");
 
   const button = characterSelectButtonBounds();
   rectMode(CORNER);
@@ -250,11 +256,13 @@ function movePlayer(){
     dungeon.enterNextRoom();
     player.setPosition(dungeon.getEntranceCol() * 50, 500); // just above the entrance door
     enemyManager.spawnForRoom(dungeon, player);
+    spellManager.clear();
   }
   else if (dungeon.isAtEntrance(cx, cy)){
     dungeon.goBack();
     player.setPosition(dungeon.getExitCol() * 50, 50); // just below that room's exit door
     enemyManager.spawnForRoom(dungeon, player);
+    spellManager.clear();
   }
   player.draw();
 }
@@ -266,6 +274,7 @@ function level1() {
     dungeon.generateDungeon();
     not_generated = false;
     enemyManager.spawnForRoom(dungeon, player);
+    spellManager.clear();
   }
   push();
   translate(Math.floor((width - 1000) / 2), Math.floor((height - 600) / 2));
@@ -276,7 +285,10 @@ function level1() {
   }
   movePlayer();
   enemyManager.update(dungeon.getFilledSquares(), player);
+  spellManager.update(dungeon.getFilledSquares(), enemyManager.enemies);
+  enemyManager.removeDead();
   enemyManager.draw();
+  spellManager.draw();
   pop();
 }
 
@@ -356,6 +368,16 @@ function returnToMainMenu() {
   not_generated = true;
   selectedCharacter = 0;
   scene_num = 0;
+}
+
+function keyPressed() {
+  // spells: only the Fire mage (card 0) can cast, and only while playing
+  if (scene_num !== 2 || selectedCharacter !== 0 || player.isDead()) return;
+  if (key === FIREBALL_KEY) {
+    spellManager.castFireball(player);
+  } else if (key === FIREWALL_KEY) {
+    spellManager.castFireWall(player);
+  }
 }
 
 function mousePressed() {

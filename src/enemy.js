@@ -25,6 +25,9 @@ class Enemy {
     this.frameInterval = settings.frameInterval ?? 15;  // frames between walk-image swaps
     this.hitboxInset = settings.hitboxInset ?? 8;       // shrinks hitbox so touches feel fair
 
+    this.maxHealth = settings.health ?? 30;             // hit points
+    this.health = this.maxHealth;
+
     this.frameIndex = 0;
     this.frameTick = 0;
 
@@ -93,6 +96,21 @@ class Enemy {
       }
     }
     return false;
+  }
+
+  // ---------- taking damage ----------
+  takeDamage(amount) {
+    this.health = Math.max(0, this.health - amount);
+  }
+
+  isDead() {
+    return this.health <= 0;
+  }
+
+  // hitbox as a plain rectangle (used by spells)
+  getHitbox() {
+    const inset = this.hitboxInset;
+    return { x: this.x + inset, y: this.y + inset, width: this.size - inset * 2, height: this.size - inset * 2 };
   }
 
   // ---------- touching the player ----------
