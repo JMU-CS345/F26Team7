@@ -18,7 +18,7 @@ class Player {
     
     moveUp(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs(this.y - (map_of_squares[i].getY() + 50)) < 5 &&
+            if (Math.abs(this.y - (map_of_squares[i].getY() + 50)) < 3 &&
              this.x + 25 >= map_of_squares[i].getX()  &&
              this.x + 25 <= map_of_squares[i].getX() + 50
             ){
@@ -34,7 +34,7 @@ class Player {
     }
     moveDown(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.y + 50) - (map_of_squares[i].getY())) < 5 &&
+            if (Math.abs((this.y + 50) - (map_of_squares[i].getY())) < 3 &&
              this.x + 25 >= map_of_squares[i].getX()  &&
              this.x + 25 <= map_of_squares[i].getX() + 50
             ){
@@ -51,7 +51,7 @@ class Player {
     }
     moveLeft(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.x) - (map_of_squares[i].getX() + 50)) < 5 &&
+            if (Math.abs((this.x) - (map_of_squares[i].getX() + 50)) < 3 &&
              ((this.y + 50 >= map_of_squares[i].getY()  &&
              this.y + 50  <= map_of_squares[i].getY() + 50) ||
              (this.y + 25 >= map_of_squares[i].getY()  &&
@@ -80,7 +80,7 @@ class Player {
     }
     moveRight(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 5 &&
+            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 4 &&
              ((this.y + 50 >= map_of_squares[i].getY()  &&
              this.y + 50  <= map_of_squares[i].getY() + 50) ||
              (this.y + 25 >= map_of_squares[i].getY()  &&
@@ -146,8 +146,30 @@ class Player {
         return this.health / this.maxHealth;
     }
 
+    // robe and hat images worn on top of the mage sprite (set when the game starts)
+    setOutfit(hatImage, robeImage) {
+        this.hat = hatImage;
+        this.robe = robeImage;
+    }
+
+    drawOutfitPiece(img, flip) {
+        if (!img) return;
+        if (flip) {
+            push();
+            translate(this.x + 50, this.y);
+            scale(-1, 1);
+            image(img, 0, 0, 50, 50);
+            pop();
+        } else {
+            image(img, this.x, this.y, 50, 50);
+        }
+    }
+
     draw() {
     image(this.frames[this.current_image], this.x, this.y, 50,50);
+    this.drawOutfitPiece(this.robe, false);
+    // the hat's tip trails behind the head, so mirror it when facing right
+    this.drawOutfitPiece(this.hat, this.current_image >= 3 && this.current_image <= 5);
 
     // Keep the health bar inside the player square, just below its top edge.
     const barX = this.x + 5;

@@ -6,17 +6,17 @@ let mainMenuButton;
 const DEATH_BUTTON_WIDTH = 220;
 const DEATH_BUTTON_HEIGHT = 60;
 const CHARACTER_SELECT_SCENE = 4;
-var selectedCharacter = 0;
+let selectedCharacter = 0;
 let enemyManager;
 let spellManager;
-const FIREBALL_KEY = "2";
-const FIREWALL_KEY = "3";
+const PROJECTILE_KEY = "2";   // fireball / icicle / rock
+const WALL_KEY = "3";         // fire wall / ice wall / tree wall
 function setup() {
   scene_num = 0; // game has not begun yet.
-  start_pic = loadImage ('assets/gui/menu_background.png'); //menu image
-  deathScreen = loadImage ('assets/gui/deathScreen.png'); // temporary death screen art
-  restartButton = loadImage ('assets/gui/restart_button.svg');
-  mainMenuButton = loadImage ('assets/gui/main_menu_button.svg');
+  start_pic = loadImage ('assets/menu_background.png'); //menu image
+  deathScreen = loadImage ('assets/deathScreen.png'); // temporary death screen art
+  restartButton = loadImage ('assets/restart_button.svg');
+  mainMenuButton = loadImage ('assets/main_menu_button.svg');
   /*
     INTRO VIDEO
   */
@@ -29,17 +29,17 @@ function setup() {
     PLAYER VARIABLES
   */
   // player character moving left sprites
-  mage_walking_left_0 = loadImage ('assets/player/Mage_left1.png');
-  mage_walking_left_1 = loadImage ('assets/player/Mage_left2.png');
-  mage_walking_left_2 = loadImage ('assets/player/Mage_left3.png');
+  mage_walking_left_0 = loadImage ('assets/mage_left.png');
+  mage_walking_left_1 = loadImage ('assets/mage_step_1.png');
+  mage_walking_left_2 = loadImage ('assets/mage_step_2.png');
   //player character moving right sprites
-  mage_walking_right_0 = loadImage ('assets/player/Mage_right1.png');
-  mage_walking_right_1 = loadImage ('assets/player/Mage_right2.png');
-  mage_walking_right_2 = loadImage ('assets/player/Mage_right3.png');
+  mage_walking_right_0 = loadImage ('assets/mage_right.png');
+  mage_walking_right_1 = loadImage ('assets/mage_right_step_1.png');
+  mage_walking_right_2 = loadImage ('assets/mage_right_step_2.png');
   // player character moving up
-  mage_down = loadImage ('assets/player/Mage_front.png');
+  mage_down = loadImage ('assets/mage_down.png');
   // player character moving down
-  mage_up = loadImage ('assets/player/Mage_back.png');
+  mage_up = loadImage ('assets/player_up.png');
   //create player
   player = new Player(mage_walking_left_0, mage_walking_left_1, mage_walking_left_2,
     mage_walking_right_0, mage_walking_right_1, mage_walking_right_2,
@@ -50,9 +50,9 @@ function setup() {
   /*
   DUNGEON VARIABLES
   */
-  wall = loadImage ('assets/env/wall.png');
-  wall_dirty = loadImage ('assets/env/wall_dirty.PNG');
-  floor = loadImage ('assets/env/floor.PNG');
+  wall = loadImage ('assets/wall.png');
+  wall_dirty = loadImage ('assets/wall_dirty.PNG');
+  floor = loadImage ('assets/floor.PNG');
   dungeon = new DungeonRoom(floor, wall, wall_dirty);
   /*
    ENEMIES
@@ -60,8 +60,7 @@ function setup() {
   Jerry.loadAssets();  // add one line like this per new enemy type
   Spider.loadAssets();
   enemyManager = new EnemyManager();
-  Fireball.loadAssets();
-  FireWall.loadAssets();
+  loadElementAssets();
   spellManager = new SpellManager();
   
 }
@@ -113,6 +112,8 @@ function loadMainMenu(){
 }
 
 function startVideo() {
+  // dress the mage in the chosen element's robe and hat
+  player.setOutfit(ELEMENTS[selectedCharacter].hatImg, ELEMENTS[selectedCharacter].robeImg);
   if (videoFailed) {
     startLevel1();
     return;
@@ -168,13 +169,13 @@ function drawCharacterCard(index, name) {
   fill(35, 30, 65);
   rect(card.x, card.y, card.width, card.height, 12);
 
-  if (index === 0 && mage_down) {
+  // preview: the mage wearing this element's robe and hat
+  const outfit = ELEMENTS[index];
+  if (mage_down) {
     image(mage_down, card.x + 45, card.y + 25, 60, 60);
-  } else {
-    noStroke();
-    fill(index === 1 ? 80 : 180, index === 1 ? 150 : 80, 220);
-    rect(card.x + 45, card.y + 25, 60, 60, 10);
   }
+  image(outfit.robeImg, card.x + 45, card.y + 25, 60, 60);
+  image(outfit.hatImg, card.x + 45, card.y + 25, 60, 60);
 
   noStroke();
   fill(hovered ? 255 : 220);
@@ -183,7 +184,7 @@ function drawCharacterCard(index, name) {
   text(name, card.x + card.width / 2, card.y + 130);
   fill(170, 170, 200);
   textSize(14);
-  text(index === 0 ? "Available" : "Placeholder", card.x + card.width / 2, card.y + 165);
+  text(ELEMENTS[index].spellsText, card.x + card.width / 2, card.y + 165);
 }
 
 function drawCharacterSelect() {
@@ -371,12 +372,13 @@ function returnToMainMenu() {
 }
 
 function keyPressed() {
-  // spells: only the Fire mage (card 0) can cast, and only while playing
-  if (scene_num !== 2 || selectedCharacter !== 0 || player.isDead()) return;
-  if (key === FIREBALL_KEY) {
-    spellManager.castFireball(player);
-  } else if (key === FIREWALL_KEY) {
-    spellManager.castFireWall(player);
+  // spells depend on the chosen element (Fire / Ice / Earth)
+  if (scene_num !== 2 || player.isDead()) return;
+  const element = ELEMENTS[selectedCharacter];
+  if (key === PROJECTILE_KEY) {
+    spellManager.castProjectile(player, element.projectile);
+  } else if (key === WALL_KEY) {
+    spellManager.castWall(player, element.wall, dungeon.getFilledSquares());
   }
 }
 
