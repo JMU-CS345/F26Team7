@@ -140,6 +140,10 @@ function setup() {
   
 }
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
 function draw() {
   switch (scene_num) {
     case 0:
@@ -201,7 +205,7 @@ function startVideo() {
 
 function characterCardBounds(index) {
   const width = 150;
-  const height = 220;
+  const height = 285;
   const gap = 30;
   const totalWidth = width * 3 + gap * 2;
   return {
@@ -233,6 +237,10 @@ function characterSelectButtonHovered() {
     mouseY >= button.y && mouseY <= button.y + button.height;
 }
 
+function formatCooldown(frames) {
+  return `${(frames / 60).toFixed(1)}s`;
+}
+
 function drawCharacterCard(index, name) {
   const card = characterCardBounds(index);
   const selected = selectedCharacter === index;
@@ -261,6 +269,13 @@ function drawCharacterCard(index, name) {
   fill(170, 170, 200);
   textSize(14);
   text(ELEMENTS[index].spellsText, card.x + card.width / 2, card.y + 165);
+  textSize(11);
+  text(`2: ${ELEMENTS[index].projectile.name}`, card.x + card.width / 2, card.y + 188);
+  text(`Cooldown: ${formatCooldown(ELEMENTS[index].projectile.cooldown)}`,
+    card.x + card.width / 2, card.y + 202);
+  text(`3: ${ELEMENTS[index].wall.name}`, card.x + card.width / 2, card.y + 220);
+  text(`Cooldown: ${formatCooldown(ELEMENTS[index].wall.cooldown)}`,
+    card.x + card.width / 2, card.y + 234);
 }
 
 function drawCharacterSelect() {
@@ -344,6 +359,58 @@ function movePlayer(){
   player.draw();
 }
 
+function drawCooldownCircle(x, y, radius, remaining, total) {
+  const progress = total > 0 ? 1 - remaining / total : 1;
+  noFill();
+  stroke(70, 70, 85);
+  strokeWeight(4);
+  circle(x, y, radius * 2);
+  stroke(progress >= 1 ? color(90, 230, 120) : color(255, 190, 80));
+  arc(x, y, radius * 2, radius * 2, -HALF_PI,
+    -HALF_PI + TWO_PI * constrain(progress, 0, 1));
+  if (remaining > 0) {
+    noStroke();
+    fill(255);
+    textSize(11);
+    text(`${(remaining / 60).toFixed(1)}s`, x, y);
+  }
+}
+
+function drawAbilityHud() {
+  const element = ELEMENTS[selectedCharacter];
+  const abilities = [
+    { key: PROJECTILE_KEY, config: element.projectile, remaining: spellManager.projectileCooldown },
+    { key: WALL_KEY, config: element.wall, remaining: spellManager.wallCooldown }
+  ];
+  const panelWidth = 280;
+  const panelHeight = 94;
+  const panelX = Math.max(10, width - panelWidth - 10);
+  const panelY = 10;
+
+  push();
+  rectMode(CORNER);
+  noStroke();
+  fill(20, 16, 40, 220);
+  rect(panelX, panelY, panelWidth, panelHeight, 10);
+  textAlign(LEFT, CENTER);
+  fill(255);
+  textSize(12);
+  text("Abilities", panelX + 10, panelY + 12);
+
+  abilities.forEach((ability, index) => {
+    const x = panelX + 18 + index * 125;
+    const y = panelY + 45;
+    if (ability.config.img) image(ability.config.img, x - 18, y - 18, 36, 36);
+    drawCooldownCircle(x, y, 22, ability.remaining, ability.config.cooldown);
+    noStroke();
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(13);
+    text(ability.key, x, y + 34);
+  });
+  pop();
+}
+
 function level1() {
   clear();
   background(0);
@@ -354,21 +421,36 @@ function level1() {
     spellManager.clear();
   }
   push();
-  translate(Math.floor((width - 1000) / 2), Math.floor((height - 600) / 2));
+  scale(width / 1000, height / 600);
   dungeon.drawDungeon();
   if (player.isDead()) {
     scene_num = 3;
+    pop();
     return;
   }
   movePlayer();
-  enemyManager.update(dungeon.getFilledSquares(), player);
+  const dungeonWalls = dungeon.getFilledSquares();
+  const spellWalls = spellManager.getBlockingTiles();
+  enemyManager.update(dungeonWalls.concat(spellWalls), player);
   spellManager.update(dungeon.getFilledSquares(), enemyManager.enemies);
   enemyManager.removeDead();
   enemyManager.draw();
   spellManager.draw();
   pop();
+  drawAbilityHud();
 }
 
+function deathButtonBounds(index) {
+  const gap = 20;
+  const totalWidth = DEATH_BUTTON_WIDTH * 2 + gap;
+  const firstX = width / 2 - totalWidth / 2;
+  return {
+    x: firstX + index * (DEATH_BUTTON_WIDTH + gap),
+    y: height - 160,
+    width: DEATH_BUTTON_WIDTH,
+    height: DEATH_BUTTON_HEIGHT
+  };
+}
 
 // Works out where the room sits. The door is a gap in the top wall.
 function getRoom() {
@@ -410,12 +492,22 @@ function drawDeathButton(index, label) {
   noFill();
   rect(button.x, button.y, button.width, button.height, 12);
   noStroke();
-  fill(...CONFIG.colors.roomFloor);
-  rect(r.innerX, r.innerY, r.innerW, r.innerH);
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(28);
+  text(label, button.x + button.width / 2, button.y + button.height / 2);
+}
 
-  // Door: opens a gap through the top wall
-  fill(...CONFIG.colors.door);
-  rect(r.doorX, r.outerY, r.doorW, R.border);
+function drawDeathScreen() {
+  if (deathScreen) {
+    image(deathScreen, 0, 0, width, height);
+  } else {
+    background(20, 16, 40);
+  }
+
+  cursor(deathButtonHovered(0) || deathButtonHovered(1) ? HAND : ARROW);
+  drawDeathButton(0, "Restart");
+  drawDeathButton(1, "Main Menu");
 }
 
 function createPlayer() {
