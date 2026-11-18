@@ -6,17 +6,17 @@ let mainMenuButton;
 const DEATH_BUTTON_WIDTH = 220;
 const DEATH_BUTTON_HEIGHT = 60;
 const CHARACTER_SELECT_SCENE = 4;
-let selectedCharacter = 0;
+var selectedCharacter = 0;
 let enemyManager;
 let spellManager;
 const PROJECTILE_KEY = "2";   // fireball / icicle / rock
 const WALL_KEY = "3";         // fire wall / ice wall / tree wall
 function setup() {
   scene_num = 0; // game has not begun yet.
-  start_pic = loadImage ('assets/menu_background.png'); //menu image
-  deathScreen = loadImage ('assets/deathScreen.png'); // temporary death screen art
-  restartButton = loadImage ('assets/restart_button.svg');
-  mainMenuButton = loadImage ('assets/main_menu_button.svg');
+  start_pic = loadImage ('assets/gui/menu_background.png'); //menu image
+  deathScreen = loadImage ('assets/gui/deathScreen.png'); // temporary death screen art
+  restartButton = loadImage ('assets/gui/restart_button.svg');
+  mainMenuButton = loadImage ('assets/gui/main_menu_button.svg');
   /*
     INTRO VIDEO
   */
@@ -29,17 +29,17 @@ function setup() {
     PLAYER VARIABLES
   */
   // player character moving left sprites
-  mage_walking_left_0 = loadImage ('assets/mage_left.png');
-  mage_walking_left_1 = loadImage ('assets/mage_step_1.png');
-  mage_walking_left_2 = loadImage ('assets/mage_step_2.png');
+  mage_walking_left_0 = loadImage ('assets/player/Mage_left1.png');
+  mage_walking_left_1 = loadImage ('assets/player/Mage_left2.png');
+  mage_walking_left_2 = loadImage ('assets/player/Mage_left3.png');
   //player character moving right sprites
-  mage_walking_right_0 = loadImage ('assets/mage_right.png');
-  mage_walking_right_1 = loadImage ('assets/mage_right_step_1.png');
-  mage_walking_right_2 = loadImage ('assets/mage_right_step_2.png');
+  mage_walking_right_0 = loadImage ('assets/player/Mage_right1.png');
+  mage_walking_right_1 = loadImage ('assets/player/Mage_right2.png');
+  mage_walking_right_2 = loadImage ('assets/player/Mage_right3.png');
   // player character moving up
-  mage_down = loadImage ('assets/mage_down.png');
+  mage_down = loadImage ('assets/player/Mage_front.png');
   // player character moving down
-  mage_up = loadImage ('assets/player_up.png');
+  mage_up = loadImage ('assets/player/Mage_back.png');
   //create player
   player = new Player(mage_walking_left_0, mage_walking_left_1, mage_walking_left_2,
     mage_walking_right_0, mage_walking_right_1, mage_walking_right_2,
@@ -50,9 +50,9 @@ function setup() {
   /*
   DUNGEON VARIABLES
   */
-  wall = loadImage ('assets/wall.png');
-  wall_dirty = loadImage ('assets/wall_dirty.PNG');
-  floor = loadImage ('assets/floor.PNG');
+  wall = loadImage ('assets/env/wall.png');
+  wall_dirty = loadImage ('assets/env/wall_dirty.PNG');
+  floor = loadImage ('assets/env/floor.PNG');
   dungeon = new DungeonRoom(floor, wall, wall_dirty);
   /*
    ENEMIES
@@ -175,7 +175,8 @@ function drawCharacterCard(index, name) {
     image(mage_down, card.x + 45, card.y + 25, 60, 60);
   }
   image(outfit.robeImg, card.x + 45, card.y + 25, 60, 60);
-  image(outfit.hatImg, card.x + 45, card.y + 25, 60, 60);
+  const hatSize = 60 * HAT_SCALE;
+  image(outfit.hatImg, card.x + 45 + (60 - hatSize) / 2, card.y + 25 + HAT_BRIM_Y * 1.2 - hatSize, hatSize, hatSize);
 
   noStroke();
   fill(hovered ? 255 : 220);

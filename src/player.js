@@ -1,3 +1,7 @@
+// Hat placement (in pixels, for the 50x50 mage tile). Tweak these if the hat looks off.
+const HAT_SCALE = 0.75;    // 1 = same size as the mage tile, smaller = smaller hat
+const HAT_BRIM_Y = 16;     // y position of the hat's brim inside the tile (0 = top edge, 50 = bottom edge)
+
 class Player {
     constructor(image0_left, image1_left, image2_left, 
         image0_right, image1_right, image2_right, 
@@ -18,7 +22,7 @@ class Player {
     
     moveUp(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs(this.y - (map_of_squares[i].getY() + 50)) < 3 &&
+            if (Math.abs(this.y - (map_of_squares[i].getY() + 50)) < 5 &&
              this.x + 25 >= map_of_squares[i].getX()  &&
              this.x + 25 <= map_of_squares[i].getX() + 50
             ){
@@ -34,7 +38,7 @@ class Player {
     }
     moveDown(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.y + 50) - (map_of_squares[i].getY())) < 3 &&
+            if (Math.abs((this.y + 50) - (map_of_squares[i].getY())) < 5 &&
              this.x + 25 >= map_of_squares[i].getX()  &&
              this.x + 25 <= map_of_squares[i].getX() + 50
             ){
@@ -51,7 +55,7 @@ class Player {
     }
     moveLeft(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.x) - (map_of_squares[i].getX() + 50)) < 3 &&
+            if (Math.abs((this.x) - (map_of_squares[i].getX() + 50)) < 5 &&
              ((this.y + 50 >= map_of_squares[i].getY()  &&
              this.y + 50  <= map_of_squares[i].getY() + 50) ||
              (this.y + 25 >= map_of_squares[i].getY()  &&
@@ -80,7 +84,7 @@ class Player {
     }
     moveRight(map_of_squares) {
         for (let i = 0; i < map_of_squares.length; i++){
-            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 4 &&
+            if (Math.abs((this.x + 50) - (map_of_squares[i].getX())) < 5 &&
              ((this.y + 50 >= map_of_squares[i].getY()  &&
              this.y + 50  <= map_of_squares[i].getY() + 50) ||
              (this.y + 25 >= map_of_squares[i].getY()  &&
@@ -165,11 +169,28 @@ class Player {
         }
     }
 
+    // draws the hat sitting on top of the head; the tip trails behind, so mirror it when facing right
+    drawHat() {
+        if (!this.hat) return;
+        const size = 50 * HAT_SCALE;
+        const left = this.x + (50 - size) / 2;
+        const top = this.y + HAT_BRIM_Y - size;
+        const facingRight = this.current_image >= 3 && this.current_image <= 5;
+        if (facingRight) {
+            push();
+            translate(left + size, top);
+            scale(-1, 1);
+            image(this.hat, 0, 0, size, size);
+            pop();
+        } else {
+            image(this.hat, left, top, size, size);
+        }
+    }
+
     draw() {
     image(this.frames[this.current_image], this.x, this.y, 50,50);
     this.drawOutfitPiece(this.robe, false);
-    // the hat's tip trails behind the head, so mirror it when facing right
-    this.drawOutfitPiece(this.hat, this.current_image >= 3 && this.current_image <= 5);
+    this.drawHat();
 
     // Keep the health bar inside the player square, just below its top edge.
     const barX = this.x + 5;

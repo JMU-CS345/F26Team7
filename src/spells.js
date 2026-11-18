@@ -12,8 +12,8 @@ const ELEMENTS = [
     spellsText: "Fireball + Fire Wall",
     hat: "assets/abilities/FireMageHat.png",
     robe: "assets/abilities/FireMageRobs.png",
-    projectile: { asset: "assets/abilities/Fireball_325617.png", damage: 10, speed: 8, size: 40, rotates: true, cooldown: 25 },
-    wall: { asset: "assets/abilities/FireWall_204f5b.png", damage: 5, lifetime: 180, tickFrames: 30, length: 3, cooldown: 120 }
+    projectile: { asset: "assets/abilities/Fireball.png", damage: 10, speed: 8, size: 40, rotates: true, cooldown: 25 },
+    wall: { asset: "assets/abilities/FireWall.png", damage: 5, lifetime: 180, tickFrames: 30, length: 3, cooldown: 120 }
   },
   {
     name: "Ice",
