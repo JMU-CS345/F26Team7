@@ -9,8 +9,8 @@ const CHARACTER_SELECT_SCENE = 4;
 var selectedCharacter = 0;
 let enemyManager;
 let spellManager;
-const FIREBALL_KEY = "2";
-const FIREWALL_KEY = "3";
+const PROJECTILE_KEY = "2";   // fireball / icicle / rock
+const WALL_KEY = "3";         // fire wall / ice wall / tree wall
 function setup() {
   scene_num = 0; // game has not begun yet.
   start_pic = loadImage ('assets/gui/menu_background.png'); //menu image
@@ -60,8 +60,7 @@ function setup() {
   Jerry.loadAssets();  // add one line like this per new enemy type
   Spider.loadAssets();
   enemyManager = new EnemyManager();
-  Fireball.loadAssets();
-  FireWall.loadAssets();
+  loadElementAssets();
   spellManager = new SpellManager();
   
 }
@@ -113,6 +112,8 @@ function loadMainMenu(){
 }
 
 function startVideo() {
+  // dress the mage in the chosen element's robe and hat
+  player.setOutfit(ELEMENTS[selectedCharacter].hatImg, ELEMENTS[selectedCharacter].robeImg);
   if (videoFailed) {
     startLevel1();
     return;
@@ -168,13 +169,14 @@ function drawCharacterCard(index, name) {
   fill(35, 30, 65);
   rect(card.x, card.y, card.width, card.height, 12);
 
-  if (index === 0 && mage_down) {
+  // preview: the mage wearing this element's robe and hat
+  const outfit = ELEMENTS[index];
+  if (mage_down) {
     image(mage_down, card.x + 45, card.y + 25, 60, 60);
-  } else {
-    noStroke();
-    fill(index === 1 ? 80 : 180, index === 1 ? 150 : 80, 220);
-    rect(card.x + 45, card.y + 25, 60, 60, 10);
   }
+  image(outfit.robeImg, card.x + 45, card.y + 25, 60, 60);
+  const hatSize = 60 * HAT_SCALE;
+  image(outfit.hatImg, card.x + 45 + (60 - hatSize) / 2, card.y + 25 + HAT_BRIM_Y * 1.2 - hatSize, hatSize, hatSize);
 
   noStroke();
   fill(hovered ? 255 : 220);
@@ -183,7 +185,7 @@ function drawCharacterCard(index, name) {
   text(name, card.x + card.width / 2, card.y + 130);
   fill(170, 170, 200);
   textSize(14);
-  text(index === 0 ? "Available" : "Placeholder", card.x + card.width / 2, card.y + 165);
+  text(ELEMENTS[index].spellsText, card.x + card.width / 2, card.y + 165);
 }
 
 function drawCharacterSelect() {
@@ -371,12 +373,13 @@ function returnToMainMenu() {
 }
 
 function keyPressed() {
-  // spells: only the Fire mage (card 0) can cast, and only while playing
-  if (scene_num !== 2 || selectedCharacter !== 0 || player.isDead()) return;
-  if (key === FIREBALL_KEY) {
-    spellManager.castFireball(player);
-  } else if (key === FIREWALL_KEY) {
-    spellManager.castFireWall(player);
+  // spells depend on the chosen element (Fire / Ice / Earth)
+  if (scene_num !== 2 || player.isDead()) return;
+  const element = ELEMENTS[selectedCharacter];
+  if (key === PROJECTILE_KEY) {
+    spellManager.castProjectile(player, element.projectile);
+  } else if (key === WALL_KEY) {
+    spellManager.castWall(player, element.wall, dungeon.getFilledSquares());
   }
 }
 

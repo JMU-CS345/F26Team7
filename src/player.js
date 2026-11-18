@@ -1,3 +1,7 @@
+// Hat placement (in pixels, for the 50x50 mage tile). Tweak these if the hat looks off.
+const HAT_SCALE = 0.75;    // 1 = same size as the mage tile, smaller = smaller hat
+const HAT_BRIM_Y = 16;     // y position of the hat's brim inside the tile (0 = top edge, 50 = bottom edge)
+
 class Player {
     constructor(image0_left, image1_left, image2_left, 
         image0_right, image1_right, image2_right, 
@@ -146,8 +150,47 @@ class Player {
         return this.health / this.maxHealth;
     }
 
+    // robe and hat images worn on top of the mage sprite (set when the game starts)
+    setOutfit(hatImage, robeImage) {
+        this.hat = hatImage;
+        this.robe = robeImage;
+    }
+
+    drawOutfitPiece(img, flip) {
+        if (!img) return;
+        if (flip) {
+            push();
+            translate(this.x + 50, this.y);
+            scale(-1, 1);
+            image(img, 0, 0, 50, 50);
+            pop();
+        } else {
+            image(img, this.x, this.y, 50, 50);
+        }
+    }
+
+    // draws the hat sitting on top of the head; the tip trails behind, so mirror it when facing right
+    drawHat() {
+        if (!this.hat) return;
+        const size = 50 * HAT_SCALE;
+        const left = this.x + (50 - size) / 2;
+        const top = this.y + HAT_BRIM_Y - size;
+        const facingRight = this.current_image >= 3 && this.current_image <= 5;
+        if (facingRight) {
+            push();
+            translate(left + size, top);
+            scale(-1, 1);
+            image(this.hat, 0, 0, size, size);
+            pop();
+        } else {
+            image(this.hat, left, top, size, size);
+        }
+    }
+
     draw() {
     image(this.frames[this.current_image], this.x, this.y, 50,50);
+    this.drawOutfitPiece(this.robe, false);
+    this.drawHat();
 
     // Keep the health bar inside the player square, just below its top edge.
     const barX = this.x + 5;
