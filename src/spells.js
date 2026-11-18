@@ -12,24 +12,24 @@ const ELEMENTS = [
     spellsText: "Fireball + Fire Wall",
     hat: "assets/abilities/FireMageHat.png",
     robe: "assets/abilities/FireMageRobs.png",
-    projectile: { asset: "assets/abilities/Fireball.png", damage: 10, speed: 8, size: 40, rotates: true, cooldown: 25 },
-    wall: { asset: "assets/abilities/FireWall.png", damage: 5, lifetime: 180, tickFrames: 30, length: 3, cooldown: 120 }
+    projectile: { name: "Fireball", asset: "assets/abilities/Fireball.png", damage: 10, speed: 8, size: 40, rotates: true, cooldown: 25 },
+    wall: { name: "Fire Wall", asset: "assets/abilities/FireWall.png", damage: 5, lifetime: 180, tickFrames: 30, length: 3, cooldown: 120 }
   },
   {
     name: "Ice",
     spellsText: "Icicle + Ice Wall",
     hat: "assets/abilities/IceMageHat.png",
     robe: "assets/abilities/IceMageRobe.png",
-    projectile: { asset: "assets/abilities/IcicleAttack.png", damage: 8, speed: 11, size: 40, rotates: true, cooldown: 18 },
-    wall: { asset: "assets/abilities/IceWall.png", damage: 4, lifetime: 180, tickFrames: 20, length: 3, cooldown: 120 }
+    projectile: { name: "Icicle", asset: "assets/abilities/IcicleAttack.png", damage: 8, speed: 11, size: 40, rotates: true, cooldown: 18 },
+    wall: { name: "Ice Wall", asset: "assets/abilities/IceWall.png", damage: 4, lifetime: 180, tickFrames: 20, length: 3, cooldown: 120 }
   },
   {
     name: "Earth",
     spellsText: "Rock + Tree Wall",
     hat: "assets/abilities/EarthHat.png",
     robe: "assets/abilities/EarthMageRobe.png",
-    projectile: { asset: "assets/abilities/EarthAttack.png", damage: 15, speed: 6, size: 45, rotates: false, cooldown: 40 },
-    wall: { asset: "assets/abilities/EarthWall.png", damage: 7, lifetime: 180, tickFrames: 45, length: 3, cooldown: 140 }
+    projectile: { name: "Rock", asset: "assets/abilities/EarthAttack.png", damage: 15, speed: 6, size: 45, rotates: false, cooldown: 40 },
+    wall: { name: "Tree Wall", asset: "assets/abilities/EarthWall.png", damage: 7, lifetime: 180, tickFrames: 45, length: 3, cooldown: 140 }
   }
 ];
 
@@ -187,6 +187,16 @@ class SpellManager {
     if (this.wallCooldown > 0) this.wallCooldown -= 1;
     for (const s of this.spells) s.update(walls, enemies);
     this.spells = this.spells.filter(s => !s.done);
+  }
+
+  getBlockingTiles() {
+    const tiles = [];
+    for (const spell of this.spells) {
+      if (spell instanceof SpellWall) {
+        tiles.push(...spell.tiles);
+      }
+    }
+    return tiles;
   }
 
   draw() {

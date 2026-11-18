@@ -1,4 +1,79 @@
-var scene_num; // Start menu, level 1, etc. Start is 0.
+// MageQuest - menu -> intro video -> blank level 1
+// Put this file next to index.html and load it AFTER p5.js:
+//   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+//   <script src="sketch.js"></script>
+
+// ---------------------------------------------------------------
+// CONFIG: everything the artist needs to touch lives up here.
+// Drop files into an "assets" folder with these names (or change
+// the paths). Anything missing falls back to a plain placeholder,
+// so the game runs before any art exists.
+// ---------------------------------------------------------------
+const CONFIG = {
+  canvasW: 960,
+  canvasH: 540,
+
+  assets: {
+    menuBackground: "assets/menu_background.png", // 960x540
+    playButton:     "assets/play_button.png",     // optional
+    playButtonHover:"assets/play_button_hover.png", // optional
+    introVideo:     "assets/intro.mp4",
+    level1Background: "assets/level1_background.png", // optional
+    playerFrame1: "assets/player_1.png", // optional; walking frame 1
+    playerFrame2: "assets/player_2.png", // optional walking frame 2
+    font: null, // e.g. "assets/MyFont.ttf"
+    wallTile:      "assets/wall.jpeg",
+    dirtyWallTile: "assets/dirtyWall.jpeg",
+  },
+
+  // Layout (positions are centers, in canvas pixels)
+  layout: {
+    titleY: 180,
+    creditsY: 250,
+    button: { x: 480, y: 565, w: 220, h: 70 },
+  },
+
+  player: {
+    size: 48,          // width and height in pixels (placeholder box / sprite size)
+    speed: 220,        // pixels per second
+    frameTime: 0.25,   // seconds each animation frame is shown while walking
+    startX: 456,       // top-left start position
+    startY: 246,
+  },
+
+  room: {
+    w: 880,
+    h: 480,
+    border: 40,
+    doorW: 80,
+  },
+
+  colors: {
+    background: [20, 16, 40],
+    title: [255, 255, 255],
+    credits: [190, 190, 220],
+    button: [110, 70, 200],
+    buttonHover: [150, 110, 240],
+    buttonText: [255, 255, 255],
+    level: [0, 0, 0],
+    playerFrame1: [120, 190, 255], // box color on animation frame 1
+    playerFrame2: [255, 200, 90],  // box color on animation frame 2
+    playerNose: [30, 30, 60],
+    roomFloor: [60, 50, 90],
+    door: [140, 90, 50],
+  },
+};
+
+// ---------------------------------------------------------------
+// Game state
+// ---------------------------------------------------------------
+const STATE = { MENU: "menu", VIDEO: "video", LEVEL1: "level1" };
+let state = STATE.MENU;
+let level1Initialized = false;
+let player;
+let imgs = {};          // loaded images (null if missing)
+let gameFont = null;
+let introVideo;
 let videoFailed = false;
 let deathScreen;
 let restartButton;
@@ -65,6 +140,10 @@ function setup() {
   
 }
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
 function draw() {
   switch (scene_num) {
     case 0:
@@ -126,7 +205,7 @@ function startVideo() {
 
 function characterCardBounds(index) {
   const width = 150;
-  const height = 220;
+  const height = 285;
   const gap = 30;
   const totalWidth = width * 3 + gap * 2;
   return {
@@ -158,6 +237,10 @@ function characterSelectButtonHovered() {
     mouseY >= button.y && mouseY <= button.y + button.height;
 }
 
+function formatCooldown(frames) {
+  return `${(frames / 60).toFixed(1)}s`;
+}
+
 function drawCharacterCard(index, name) {
   const card = characterCardBounds(index);
   const selected = selectedCharacter === index;
@@ -186,6 +269,13 @@ function drawCharacterCard(index, name) {
   fill(170, 170, 200);
   textSize(14);
   text(ELEMENTS[index].spellsText, card.x + card.width / 2, card.y + 165);
+  textSize(11);
+  text(`2: ${ELEMENTS[index].projectile.name}`, card.x + card.width / 2, card.y + 188);
+  text(`Cooldown: ${formatCooldown(ELEMENTS[index].projectile.cooldown)}`,
+    card.x + card.width / 2, card.y + 202);
+  text(`3: ${ELEMENTS[index].wall.name}`, card.x + card.width / 2, card.y + 220);
+  text(`Cooldown: ${formatCooldown(ELEMENTS[index].wall.cooldown)}`,
+    card.x + card.width / 2, card.y + 234);
 }
 
 function drawCharacterSelect() {
@@ -269,6 +359,58 @@ function movePlayer(){
   player.draw();
 }
 
+function drawCooldownCircle(x, y, radius, remaining, total) {
+  const progress = total > 0 ? 1 - remaining / total : 1;
+  noFill();
+  stroke(70, 70, 85);
+  strokeWeight(4);
+  circle(x, y, radius * 2);
+  stroke(progress >= 1 ? color(90, 230, 120) : color(255, 190, 80));
+  arc(x, y, radius * 2, radius * 2, -HALF_PI,
+    -HALF_PI + TWO_PI * constrain(progress, 0, 1));
+  if (remaining > 0) {
+    noStroke();
+    fill(255);
+    textSize(11);
+    text(`${(remaining / 60).toFixed(1)}s`, x, y);
+  }
+}
+
+function drawAbilityHud() {
+  const element = ELEMENTS[selectedCharacter];
+  const abilities = [
+    { key: PROJECTILE_KEY, config: element.projectile, remaining: spellManager.projectileCooldown },
+    { key: WALL_KEY, config: element.wall, remaining: spellManager.wallCooldown }
+  ];
+  const panelWidth = 280;
+  const panelHeight = 94;
+  const panelX = Math.max(10, width - panelWidth - 10);
+  const panelY = 10;
+
+  push();
+  rectMode(CORNER);
+  noStroke();
+  fill(20, 16, 40, 220);
+  rect(panelX, panelY, panelWidth, panelHeight, 10);
+  textAlign(LEFT, CENTER);
+  fill(255);
+  textSize(12);
+  text("Abilities", panelX + 10, panelY + 12);
+
+  abilities.forEach((ability, index) => {
+    const x = panelX + 18 + index * 125;
+    const y = panelY + 45;
+    if (ability.config.img) image(ability.config.img, x - 18, y - 18, 36, 36);
+    drawCooldownCircle(x, y, 22, ability.remaining, ability.config.cooldown);
+    noStroke();
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(13);
+    text(ability.key, x, y + 34);
+  });
+  pop();
+}
+
 function level1() {
   clear();
   background(0);
@@ -279,29 +421,42 @@ function level1() {
     spellManager.clear();
   }
   push();
-  translate(Math.floor((width - 1000) / 2), Math.floor((height - 600) / 2));
+  scale(width / 1000, height / 600);
   dungeon.drawDungeon();
   if (player.isDead()) {
     scene_num = 3;
+    pop();
     return;
   }
   movePlayer();
-  enemyManager.update(dungeon.getFilledSquares(), player);
+  const dungeonWalls = dungeon.getFilledSquares();
+  const spellWalls = spellManager.getBlockingTiles();
+  enemyManager.update(dungeonWalls.concat(spellWalls), player);
   spellManager.update(dungeon.getFilledSquares(), enemyManager.enemies);
   enemyManager.removeDead();
   enemyManager.draw();
   spellManager.draw();
   pop();
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  drawAbilityHud();
 }
 
 function deathButtonBounds(index) {
   const gap = 20;
   const totalWidth = DEATH_BUTTON_WIDTH * 2 + gap;
   const firstX = width / 2 - totalWidth / 2;
+  return {
+    x: firstX + index * (DEATH_BUTTON_WIDTH + gap),
+    y: height - 160,
+    width: DEATH_BUTTON_WIDTH,
+    height: DEATH_BUTTON_HEIGHT
+  };
+}
+
+// Works out where the room sits. The door is a gap in the top wall.
+function getRoom() {
+  const R = CONFIG.room;
+  const outerX = Math.floor((width - R.w) / 2);
+  const outerY = Math.floor((height - R.h) / 2);
   return {
     x: firstX + index * (DEATH_BUTTON_WIDTH + gap),
     y: height - 160,
@@ -346,6 +501,90 @@ function drawDeathButton(index, label) {
 function drawDeathScreen() {
   if (deathScreen) {
     image(deathScreen, 0, 0, width, height);
+  } else {
+    background(20, 16, 40);
+  }
+
+  cursor(deathButtonHovered(0) || deathButtonHovered(1) ? HAND : ARROW);
+  drawDeathButton(0, "Restart");
+  drawDeathButton(1, "Main Menu");
+}
+
+function createPlayer() {
+  const P = CONFIG.player;
+  const r = getRoom();
+  player = {
+    x: r.innerX + r.innerW / 2 - P.size / 2,
+    y: r.innerY + r.innerH / 2 - P.size / 2,
+    w: P.size,
+    h: P.size,
+    moving: false,
+    facing: 1, 
+    lastAxis: "x", 
+    look: "side",
+    animFrame: 0,
+    animTimer: 0,
+  };
+}
+
+function isBlocked(x, y, w, h) {
+  const r = getRoom();
+
+  // Fully inside the floor
+  if (x >= r.innerX && y >= r.innerY &&
+    x + w <= r.innerX + r.innerW && y + h <= r.innerY + r.innerH) return false;
+
+  if (x >= r.doorX && x + w <= r.doorX + r.doorW &&
+    y >= r.outerY && y + h <= r.innerY + r.innerH) return false;
+
+  return true;
+}
+
+function updatePlayer(dt) {
+  const P = CONFIG.player;
+
+  let dx = 0;
+  let dy = 0;
+  if (keyIsDown(LEFT_ARROW)) dx -= 1;
+  if (keyIsDown(RIGHT_ARROW)) dx += 1;
+  if (keyIsDown(UP_ARROW)) dy -= 1;
+  if (keyIsDown(DOWN_ARROW)) dy += 1;
+
+  // No diagonal movement: if a horizontal key and a vertical key are both
+  // held, only the one pressed most recently counts.
+  if (dx !== 0 && dy !== 0) {
+    if (player.lastAxis === "x") dy = 0;
+    else dx = 0;
+  }
+
+  player.moving = dx !== 0 || dy !== 0;
+
+  // Face the way we're walking. "facing" (left/right) drives the sprite flip and
+  // only changes on horizontal moves; "look" also tracks up/down for the nose.
+  if (dx < 0) { player.facing = -1; player.look = "side"; }
+  else if (dx > 0) { player.facing = 1; player.look = "side"; }
+  else if (dy < 0) player.look = "up";
+  else if (dy > 0) player.look = "down";
+
+  if (player.moving) {
+    // Only one of dx / dy is non-zero at this point
+    dx = dx * P.speed * dt;
+    dy = dy * P.speed * dt;
+
+    // Move one axis at a time so the wizard can slide along walls later
+    if (!isBlocked(player.x + dx, player.y, player.w, player.h)) player.x += dx;
+    if (!isBlocked(player.x, player.y + dy, player.w, player.h)) player.y += dy;
+
+    // Keep the wizard on the canvas for now
+    player.x = constrain(player.x, 0, width - player.w);
+    player.y = constrain(player.y, 0, height - player.h);
+
+    // Flip between the two animation frames while walking
+    player.animTimer += dt;
+    if (player.animTimer >= P.frameTime) {
+      player.animTimer -= P.frameTime;
+      player.animFrame = 1 - player.animFrame;
+    }
   } else {
     background(20, 16, 40);
   }
